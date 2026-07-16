@@ -4,3 +4,10 @@ Este repositorio contiene la implementación de un servidor MCP (Model Context P
 
 ________________
 
+#### Tabla de Contenidos
+
+A continuación se presentan los módulos de investigación y desarrollo técnico del proyecto:
+
+**Unidad 1: Fundamentos y Arquitectura del Model Context Protocol (MCP)**
+*  Tema 1.1: [Introducción al MCP](assets/introduccion.md)
+*  Tema 1.2: [Arquitectura del MCP](assets/arquitectura.md)
