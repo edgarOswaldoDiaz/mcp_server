@@ -18,7 +18,7 @@ El funcionamiento del protocolo depende de la interacción armónica de tres com
 
 > **Nota:** El término *Servidor MCP* califica estrictamente al programa que provee los datos de contexto, independientemente de la infraestructura donde resida. Estos componentes pueden ejecutarse de manera local (en la misma máquina del host) o de forma remota en la nube.
 
-![Componentes Principales de la Arquitectura MCP](assets/arquitectura_mcp.png)
+![Componentes de la Arquitectura](arquitectura_mcp.png)
 
 ---
 
@@ -44,7 +44,7 @@ Para la transmisión física de las tramas JSON-RPC 2.0 entre la capa cliente y 
 *   **Transporte Estándar I/O (stdio):** Diseñado específicamente para la integración de **recursos locales** (sistemas de archivos locales, bases de datos locales y APIs residentes en la misma máquina). Funciona mediante la transmisión directa y ligera de flujos de entrada y salida estándar, operando de manera sincrónica y optimizada para mensajería de baja latencia.
 *   **Eventos Enviados por el Servidor (SSE - Server-Sent Events):** Orientado a la integración eficiente de **recursos remotos** (bases de datos en la nube o APIs externas de red). En este modelo, las solicitudes del cliente hacia el servidor se transmiten mediante peticiones estándar `HTTP POST`, mientras que el servidor utiliza el canal asíncrono `SSE` para enviar flujos de datos y eventos en tiempo real hacia el cliente, permitiendo gestionar múltiples llamadas concurrentes basadas en eventos.
 
-![Diagrama Detallado de Flujos y Transportes en MCP](assets/arquitectura_mcp.png)
+![Diagrama Detallado de Flujos y Transportes en MCP](model-context-protocol-architecture.jpg)
 
 ---
 
