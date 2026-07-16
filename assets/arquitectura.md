@@ -44,7 +44,7 @@ Para la transmisión física de las tramas JSON-RPC 2.0 entre la capa cliente y 
 *   **Transporte Estándar I/O (stdio):** Diseñado específicamente para la integración de **recursos locales** (sistemas de archivos locales, bases de datos locales y APIs residentes en la misma máquina). Funciona mediante la transmisión directa y ligera de flujos de entrada y salida estándar, operando de manera sincrónica y optimizada para mensajería de baja latencia.
 *   **Eventos Enviados por el Servidor (SSE - Server-Sent Events):** Orientado a la integración eficiente de **recursos remotos** (bases de datos en la nube o APIs externas de red). En este modelo, las solicitudes del cliente hacia el servidor se transmiten mediante peticiones estándar `HTTP POST`, mientras que el servidor utiliza el canal asíncrono `SSE` para enviar flujos de datos y eventos en tiempo real hacia el cliente, permitiendo gestionar múltiples llamadas concurrentes basadas en eventos.
 
-![Diagrama Detallado de Flujos y Transportes en MCP](assets/model-context-protocol-architecture.jpg)
+![Diagrama Detallado de Flujos y Transportes en MCP](assets/arquitectura_mcp.png)
 
 ---
 
@@ -71,4 +71,4 @@ Para garantizar que los entornos se mantengan sincronizados y reactivos ante cam
 ## Referencias
 >   Gutowska, A. (2026). Protocolo de contexto del modelo (MCP). *IBM*. https://www.ibm.com/mx-es/think/topics/model-context-protocol
 
->   Model Context Protocol. (s.f.). *What is the Model Context Protocol (MCP)?* https://modelcontextprotocol.io/docs/getting-started/intro
+>   Model Context Protocol. (s.f.). *Architecture overview* https://modelcontextprotocol.io/docs/learn/architecture
