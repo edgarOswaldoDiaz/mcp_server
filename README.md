@@ -11,3 +11,4 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 **Unidad 1: Fundamentos y Arquitectura del Model Context Protocol (MCP)**
 *  Tema 1.1: [Introducción al MCP](assets/introduccion.md)
 *  Tema 1.2: [Arquitectura del MCP](assets/arquitectura.md)
+*  Tema 1.3: [Componentes y Características del Ecosistema MCP](assets/componentes.md)
