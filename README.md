@@ -12,3 +12,6 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 *  Tema 1.1: [Introducción al MCP](assets/introduccion.md)
 *  Tema 1.2: [Arquitectura del MCP](assets/arquitectura.md)
 *  Tema 1.3: [Componentes y Características del Ecosistema MCP](assets/componentes.md)
+
+**Unidad 2: Herramientas del Ecosistema Open-Source e Infraestructura**
+*  Tema 2.1: [SDKs y Frameworks Oficiales](assets/sdk.md)
