@@ -157,5 +157,7 @@ El principio de **Composabilidad** en MCP establece que la frontera entre un cli
 
 > Koul, N. (2025, Marzo 27). *The Model Context Protocol (MCP) — A Complete Tutorial*. Medium. https://medium.com/@nimritakoul01/the-model-context-protocol-mcp-a-complete-tutorial-a3abe8a7f4ef
 
-> Documentación oficial de Model Context Protocol — *Understanding MCP servers* y *Understanding MCP clients*. modelcontextprotocol.io (especificación versión `2026-07-28`).
+>   Model Context Protocol. (s.f.). *Understanding MCP clients* (especificación versión `2026-07-28`). https://modelcontextprotocol.io/docs/2026-07-28/learn/client-concepts
+
+>   Model Context Protocol. (s.f.). *Understanding MCP servers* (especificación versión `2026-07-28`). https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts
 ‌
