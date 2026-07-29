@@ -15,3 +15,4 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 
 **Unidad 2: Herramientas del Ecosistema Open-Source e Infraestructura**
 *  Tema 2.1: [SDKs y Frameworks Oficiales](assets/sdk.md)
+*  Tema 2.2: [FastMCP como Capa de Abstracción](assets/fastmcp.md)
