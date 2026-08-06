@@ -9,10 +9,16 @@ ________________
 A continuación se presentan los módulos de investigación y desarrollo técnico del proyecto:
 
 **Unidad 1: Fundamentos y Arquitectura del Model Context Protocol (MCP)**
-*  Tema 1.1: [Introducción al MCP](assets/introduccion.md)
-*  Tema 1.2: [Arquitectura del MCP](assets/arquitectura.md)
-*  Tema 1.3: [Componentes y Características del Ecosistema MCP](assets/componentes.md)
+*   [Tema 1.1: Introducción al MCP](assets/introduccion.md)
+*   [Tema 1.2: Arquitectura del MCP](assets/arquitectura.md)
+*   [Tema 1.3: Componentes y Características del Ecosistema MCP](assets/componentes.md)
 
 **Unidad 2: Herramientas del Ecosistema Open-Source e Infraestructura**
-*  Tema 2.1: [SDKs y Frameworks Oficiales](assets/sdk.md)
-*  Tema 2.2: [FastMCP como Capa de Abstracción](assets/fastmcp.md)
+*   **2.1: Herramientas para el Desarrollo de Servidores MCP (Server-Side)**
+    *   [Tema 2.1.1: SDKs y Frameworks Oficiales](assets/sdk.md)
+    *   [Tema 2.1.2: FastMCP como Capa de Abstracción](assets/fastmcp.md)
+
+*   **2.2: Herramientas para Clientes MCP (Client-Side)**
+*   **2.3: Herramientas para el Host**
+*   **2.4: Modelos de Lenguaje Grande (LLMs)**
+    *   [Tema 2.4.1: LLMs](assets/llm.md)
