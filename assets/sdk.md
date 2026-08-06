@@ -1,4 +1,4 @@
-# 2.1. SDKs y Frameworks Oficiales
+# 2.1.1 SDKs y Frameworks Oficiales
 
 ## ¿Qué es un SDK?
 Un Kit de Desarrollo de Software (SDK, por sus siglas en inglés) es un conjunto de herramientas de creación específicas de plataformas para desarrolladores, proporcionado usualmente por el fabricante de una plataforma de hardware, un sistema operativo o un lenguaje de programación.
