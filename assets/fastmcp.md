@@ -1,4 +1,4 @@
-# 2.2 FastMCP como Capa de Abstracción
+# 2.1.2 FastMCP como Capa de Abstracción
 
 ## ¿Qué es FastMCP?
 
