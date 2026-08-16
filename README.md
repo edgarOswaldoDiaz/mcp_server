@@ -18,6 +18,7 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
     *   [Tema 2.1.1: SDKs y Frameworks Oficiales](assets/sdk.md)
     *   [Tema 2.1.2: FastMCP como Capa de Abstracción](assets/fastmcp.md)
     *   [Tema 2.1.3: Contenedores](assets/contenedores.md)
+         *   [Docker](assets/docker.md)
 
 *   **2.2: Herramientas para Clientes MCP (Client-Side)**
 *   **2.3: Herramientas para el Host**
