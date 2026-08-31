@@ -66,8 +66,12 @@ Aplicaciones que ya implementan ambas conexiones (LLM + Cliente(s) MCP) de forma
 - **Gobernanza de servidores**: en un entorno organizacional, conviene mantener una lista controlada de servidores MCP aprobados, para reducir el riesgo de conectar servidores no confiables o comprometidos.
 
 ## Referencias
-> Model Context Protocol. (s.f.). *Architecture*. Model Context Protocol. https://modelcontextprotocol.io/specification/2025-06-18/architecture
+> Model Context Protocol. (s.f.). *Architecture*. Model Context Protocol. https://modelcontextprotocol.io/specification/2026-07-28/architecture
+
 > Latenode. (2026, Mayo 27). *MCP Architecture Explained: Client, Server, and Transport Layer*. Latenode Blog. https://latenode.com/blog/model-context-protocol-architecture
+
 > Zenity. (2026, Julio 9). *What Is the Model Context Protocol? Full Guide*. Zenity Academy. https://zenity.io/academy/model-context-protocol-explained
+
 > Model Context Protocol. (s.f.). *MCP Architecture: Design Philosophy & Engineering Principles*. Model Context Protocol Info. https://modelcontextprotocol.info/docs/concepts/architecture/
+
 > Wiz. (2026, Junio 23). *Understanding Model Context Protocol Security (MCP) in 2026*. Wiz Academy. https://www.wiz.io/academy/ai-security/model-context-protocol-security
