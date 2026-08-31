@@ -1,4 +1,4 @@
-# 2.3.1: Herramientas para el Host
+# 2.3.1 Herramientas para el Host
 
 ## ¿Qué es el Host y por qué necesita dos conexiones?
 
