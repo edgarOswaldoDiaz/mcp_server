@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 620" width="100%" height="100%" style="background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Marcadores de Flechas -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+    </marker>
+
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- ==================== BLOQUE LLM ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="275" y="30" width="300" height="70" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+    <text x="425" y="60" fill="#f8fafc" font-size="16" font-weight="700" text-anchor="middle">🤖 LLM / Ollama</text>
+    <text x="425" y="82" fill="#94a3b8" font-size="12" text-anchor="middle">Motor de Inferencia de Lenguaje</text>
+  </g>
+
+  <!-- Conexión LLM <-> HOST -->
+  <line x1="425" y1="100" x2="425" y2="180" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow-blue)" marker-start="url(#arrow-blue)"/>
+  <rect x="440" y="125" width="260" height="30" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="450" y="145" fill="#38bdf8" font-size="11" font-weight="600">Conexión nativa SDK / API (NO es MCP)</text>
+
+  <!-- ==================== BLOQUE HOST ==================== -->
+  <g filter="url(#shadow)">
+    <!-- Contenedor Host Principal -->
+    <rect x="50" y="180" width="750" height="220" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+    <rect x="50" y="180" width="750" height="40" rx="16" fill="#334155"/>
+    <rect x="50" y="205" width="750" height="15" fill="#334155"/>
+    <text x="75" y="206" fill="#f8fafc" font-size="14" font-weight="700">💻 HOST (MCP Host / Aplicación Principal)</text>
+    <text x="775" y="206" fill="#94a3b8" font-size="11" text-anchor="end">Lógica central, orquestación y contexto</text>
+
+    <!-- Sub-Clientes MCP -->
+    <!-- Cliente 1 -->
+    <rect x="80" y="250" width="200" height="120" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="180" y="285" fill="#34d399" font-size="14" font-weight="700" text-anchor="middle">🔌 Cliente MCP 1</text>
+    <text x="180" y="315" fill="#94a3b8" font-size="11" text-anchor="middle">Instancia de conexión 1:1</text>
+    <text x="180" y="335" fill="#64748b" font-size="10" text-anchor="middle">stdio / SSE Client</text>
+
+    <!-- Cliente 2 -->
+    <rect x="325" y="250" width="200" height="120" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="425" y="285" fill="#34d399" font-size="14" font-weight="700" text-anchor="middle">🔌 Cliente MCP 2</text>
+    <text x="425" y="315" fill="#94a3b8" font-size="11" text-anchor="middle">Instancia de conexión 1:1</text>
+    <text x="425" y="335" fill="#64748b" font-size="10" text-anchor="middle">stdio / SSE Client</text>
+
+    <!-- Cliente 3 -->
+    <rect x="570" y="250" width="200" height="120" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="670" y="285" fill="#34d399" font-size="14" font-weight="700" text-anchor="middle">🔌 Cliente MCP 3</text>
+    <text x="670" y="315" fill="#94a3b8" font-size="11" text-anchor="middle">Instancia de conexión 1:1</text>
+    <text x="670" y="335" fill="#64748b" font-size="10" text-anchor="middle">stdio / SSE Client</text>
+  </g>
+
+  <!-- ==================== LÍNEAS PROTOCOLO MCP ==================== -->
+  <!-- Canal 1 -->
+  <line x1="180" y1="370" x2="180" y2="490" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-emerald)" marker-start="url(#arrow-emerald)"/>
+  <rect x="100" y="415" width="160" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="180" y="431" fill="#34d399" font-size="10" font-weight="600" text-anchor="middle">JSON-RPC 2.0 (MCP)</text>
+
+  <!-- Canal 2 -->
+  <line x1="425" y1="370" x2="425" y2="490" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-emerald)" marker-start="url(#arrow-emerald)"/>
+  <rect x="345" y="415" width="160" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="425" y="431" fill="#34d399" font-size="10" font-weight="600" text-anchor="middle">JSON-RPC 2.0 (MCP)</text>
+
+  <!-- Canal 3 -->
+  <line x1="670" y1="370" x2="670" y2="490" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-emerald)" marker-start="url(#arrow-emerald)"/>
+  <rect x="590" y="415" width="160" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="670" y="431" fill="#34d399" font-size="10" font-weight="600" text-anchor="middle">JSON-RPC 2.0 (MCP)</text>
+
+  <!-- ==================== SERVIDORES MCP ==================== -->
+  <!-- Servidor 1 -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="490" width="200" height="90" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="180" y="525" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">🗄️ Servidor MCP 1</text>
+    <text x="180" y="548" fill="#f8fafc" font-size="12" text-anchor="middle">Base de Datos</text>
+    <text x="180" y="565" fill="#94a3b8" font-size="10" text-anchor="middle">(Postgres / MySQL / SQLite)</text>
+  </g>
+
+  <!-- Servidor 2 -->
+  <g filter="url(#shadow)">
+    <rect x="325" y="490" width="200" height="90" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="425" y="525" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">📁 Servidor MCP 2</text>
+    <text x="425" y="548" fill="#f8fafc" font-size="12" text-anchor="middle">Sistema de Archivos</text>
+    <text x="425" y="565" fill="#94a3b8" font-size="10" text-anchor="middle">(Lectura / Escritura Local)</text>
+  </g>
+
+  <!-- Servidor 3 -->
+  <g filter="url(#shadow)">
+    <rect x="570" y="490" width="200" height="90" rx="10" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="670" y="525" fill="#fbbf24" font-size="13" font-weight="700" text-anchor="middle">🌐 Servidor MCP 3</text>
+    <text x="670" y="548" fill="#f8fafc" font-size="12" text-anchor="middle">API Externa</text>
+    <text x="670" y="565" fill="#94a3b8" font-size="10" text-anchor="middle">(REST / OpenAPI / Servicios)</text>
+  </g>
+</svg>
