@@ -24,5 +24,6 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 *   **2.2: Herramientas para Clientes MCP (Client-Side)**
     *   [Tema 2.2.1: SDK de Cliente — Python](assets/sdk_cliente_python.md)
 *   **2.3: Herramientas para el Host**
+    *   [Tema 2.3.1: Herramientas para Host](assets/herramientas_host.md)
 *   **2.4: Modelos de Lenguaje Grande (LLMs)**
     *   [Tema 2.4.1: LLMs](assets/llm.md)
