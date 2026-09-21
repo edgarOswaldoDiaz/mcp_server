@@ -1,4 +1,4 @@
-# 2.5.1 Ollama como Motor de Ejecución Local de LLMs
+# 2.5.2 Ollama como Motor de Ejecución Local de LLMs
 
 ## ¿Qué es Ollama?
 
