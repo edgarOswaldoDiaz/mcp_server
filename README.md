@@ -32,3 +32,4 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
     *   [Tema 2.5.2: Ollama](assets/ollama.md)
 
  **Unidad 3: Seguridad**
+*   [Tema 3.1: Seguridad en MCP](assets/seguridad.md)
