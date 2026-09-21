@@ -1,0 +1,28 @@
+# 3.2 OWASP Top 10 para MCP
+
+## Acerca del OWASP MCP Top 10
+
+El OWASP Top 10 para MCP identifica los riesgos de seguridad más críticos que surgen a lo largo del ciclo de vida de los sistemas habilitados con MCP, abarcando desde la vinculación incorrecta de modelos (*model misbinding*), la suplantación de contexto y la manipulación del estado de los prompts, hasta las referencias inseguras en memoria y el abuso de canales encubiertos. Estos riesgos se amplifican en escenarios que involucran IA agéntica, encadenamiento de modelos, orquestación multimodal y asignación dinámica de roles.
+
+Al mapear los diez riesgos más relevantes relacionados con MCP y ofrecer recomendaciones concretas para el diseño, la implementación y la auditoría seguros, se busca dotar a personas desarrolladoras de IA y profesionales de seguridad de los conocimientos necesarios para construir sistemas de IA conscientes del contexto y resilientes ante ataques. El OWASP MCP Top 10 está concebido como un documento vivo, que evoluciona junto con el ritmo de las capacidades de los modelos de IA y la innovación del protocolo, fundamentado en amenazas del mundo real, hallazgos de investigación y retroalimentación de la industria.
+
+## Resumen de los Diez Riesgos
+
+| # | Riesgo | Descripción |
+|---|---|---|
+| **MCP01** | Mala Gestión de Tokens y Exposición de Secretos | Credenciales embebidas en el código, tokens de larga duración y secretos almacenados en la memoria del modelo o en los registros del protocolo pueden exponer entornos sensibles a accesos no autorizados. Un atacante puede obtener estos tokens mediante inyección de prompts, contexto comprometido o trazas de depuración, lo que puede derivar en el compromiso total de los sistemas conectados. |
+| **MCP02** | Escalamiento de Privilegios por Expansión de Alcance (*Scope Creep*) | Los permisos temporales o definidos de forma laxa dentro de los servidores MCP suelen ampliarse con el tiempo, otorgando a los agentes capacidades excesivas. Un atacante que explote una aplicación débil de los límites de alcance puede ejecutar acciones no previstas, como modificar repositorios, tomar control del sistema o exfiltrar datos. |
+| **MCP03** | Envenenamiento de Herramientas (*Tool Poisoning*) | Ocurre cuando un adversario compromete las herramientas, plugins o las salidas de estos de los que depende un modelo de IA, inyectando contexto malicioso, engañoso o sesgado con el fin de manipular el comportamiento del modelo. |
+| **MCP04** | Ataques a la Cadena de Suministro de Software y Manipulación de Dependencias | Una dependencia comprometida puede alterar el comportamiento de un agente o introducir puertas traseras a nivel de ejecución. |
+| **MCP05** | Inyección y Ejecución de Comandos | Sucede cuando un agente de IA construye y ejecuta comandos del sistema, scripts de shell, llamadas a APIs o fragmentos de código a partir de entradas no confiables —ya sea provenientes de prompts del usuario, contexto recuperado o fuentes de datos de terceros— sin la validación o sanitización adecuadas. |
+| **MCP06** | Inyección de Prompts a través de Cargas Contextuales (*Contextual Payloads*) | Este riesgo es análogo a los ataques de inyección clásicos (como XSS o inyección SQL), solo que en el contexto de MCP el "intérprete" es el propio modelo y la "carga maliciosa" (*payload*) es texto, o cualquier contenido que se convierta en texto tras procesos como OCR. Dado que los modelos están diseñados para seguir instrucciones en lenguaje natural, los ataques de inyección de prompts resultan a la vez poderosos y difíciles de detectar. |
+| **MCP07** | Autenticación y Autorización Insuficientes | Ocurre cuando los servidores MCP, herramientas o agentes no verifican adecuadamente las identidades ni aplican controles de acceso durante las interacciones. Dado que los ecosistemas MCP suelen involucrar múltiples agentes, usuarios y servicios que intercambian datos y ejecutan acciones, una validación de identidad débil o inexistente expone rutas de ataque críticas. |
+| **MCP08** | Falta de Auditoría y Telemetría | Una telemetría limitada por parte de los servidores y agentes MCP dificulta la investigación y la respuesta ante incidentes. Se recomienda mantener registros detallados de las invocaciones de herramientas, los cambios de contexto y las interacciones entre usuarios y agentes, con rastros de auditoría inmutables. |
+| **MCP09** | Servidores MCP en la Sombra (*Shadow MCP Servers*) | Hace referencia a implementaciones no aprobadas o no supervisadas de instancias de Model Context Protocol que operan fuera de la gobernanza formal de seguridad de una organización. De forma similar al fenómeno de *Shadow IT*, estos nodos MCP no autorizados suelen ser levantados por desarrolladores, equipos de investigación o científicos de datos con fines de experimentación, pruebas o simple conveniencia, utilizando con frecuencia credenciales por defecto, configuraciones permisivas o APIs sin protección. |
+| **MCP10** | Inyección de Contexto y Sobreexposición (*Context Injection & Over-Sharing*) | En MCP, el "contexto" representa la memoria de trabajo que almacena prompts, datos recuperados y resultados intermedios a través de agentes o sesiones. Cuando las ventanas de contexto se comparten, persisten o no están suficientemente delimitadas, información sensible de una tarea, usuario o agente puede quedar expuesta a otro. Este fenómeno, conocido como sobreexposición de contexto (*context over-sharing*), convierte una característica pensada para la conveniencia en un riesgo de seguridad. |
+
+---
+
+## Referencias
+
+> OWASP. *About the MCP Top 10*. OWASP.org. https://owasp.org/projects/mcp-top-10 
