@@ -27,3 +27,6 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
     *   [Tema 2.3.1: Herramientas para Host](assets/herramientas_host.md)
 *   **2.4: Modelos de Lenguaje Grande (LLMs)**
     *   [Tema 2.4.1: LLMs](assets/llm.md)
+*   **2.5: Modelos de Ejecución e Inferencia Local**
+    *   [Tema 2.5.1: Motores de Ejecución e Inferencia](assets/motores_ejecucion.md)
+    *   [Tema 2.5.2: Ollama](assets/ollama.md)
