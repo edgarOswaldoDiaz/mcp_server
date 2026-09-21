@@ -30,3 +30,5 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 *   **2.5: Modelos de Ejecución e Inferencia Local**
     *   [Tema 2.5.1: Motores de Ejecución e Inferencia](assets/motores_ejecucion.md)
     *   [Tema 2.5.2: Ollama](assets/ollama.md)
+
+ **Unidad 3: Seguridad
