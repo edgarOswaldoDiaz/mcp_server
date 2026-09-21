@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  agente_a:
+    image: python:3.10-slim
+    container_name: mcp_agente_a
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    command: tail -f /dev/null
+
+  agente_b:
+    image: python:3.10-slim
+    container_name: mcp_agente_b
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    command: tail -f /dev/null
+    
