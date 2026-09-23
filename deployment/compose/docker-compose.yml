@@ -1,0 +1,56 @@
+services:
+
+  mcp-server:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    container_name: mcp-server
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8000
+
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; socket.create_connection(('127.0.0.1', 8000), timeout=2)"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+    networks:
+      - mcp-network
+
+
+  integration-tests:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.tests
+
+    environment:
+      MCP_SERVER_URL: http://mcp-server:8000/mcp
+
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+
+    networks:
+      - mcp-network
+
+
+networks:
+  mcp-network:
+    driver: bridge
+
+

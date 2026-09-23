@@ -1,0 +1,23 @@
+FROM python:3.12-slim
+
+# Evita archivos .pyc y permite ver logs inmediatamente
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Instalar dependencias primero para aprovechar la cache de Docker
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el código del proyecto
+COPY src ./src
+
+# El MCP Server escucha en este puerto
+EXPOSE 8000
+
+# Ejecutar el servidor MCP
+CMD ["python", "-m", "src.mcp.server.main"]
+
