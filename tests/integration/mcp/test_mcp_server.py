@@ -16,7 +16,7 @@ async def test_list_tools(mcp_server):
         }
 
         assert "echo" in tool_names
-        assert "add" in tool_names
+        assert "sumar" in tool_names
         assert "get_system_status" in tool_names
 
 
@@ -27,15 +27,13 @@ async def test_echo(mcp_server):
         result = await client.call_tool(
             "echo",
             {
-                "message": "integration test"
+                "mensaje": "integration test"
             }
         )
 
         assert result.is_error is False
 
-        assert result.data == {
-            "message": "integration test"
-        }
+        assert result.data == "integration test"
 
 
 async def test_add(mcp_server):
@@ -43,7 +41,7 @@ async def test_add(mcp_server):
     async with Client(mcp_server) as client:
 
         result = await client.call_tool(
-            "add",
+            "sumar",
             {
                 "a": 10,
                 "b": 20
@@ -52,9 +50,7 @@ async def test_add(mcp_server):
 
         assert result.is_error is False
 
-        assert result.data == {
-            "result": 30
-        }
+        assert result.data == 30
 
 
 async def test_system_status(mcp_server):
@@ -131,7 +127,7 @@ async def test_invalid_tool_arguments(mcp_server):
         with pytest.raises(ToolError):
 
             await client.call_tool(
-                "add",
+                "sumar",
                 {
                     "a": 10,
                     "b": "invalid"
