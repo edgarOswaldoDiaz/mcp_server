@@ -1,0 +1,6 @@
+{
+"name":"agente-comercio-turismo-mundial",
+"description":"agente que consulta datos de visitantes extranjeros y comercio exterior relacionados con el mundial 2026.",
+"role":"A2A Client (Sender)",
+"skills":[{"id":"consultar-visitantes-extranjeros","description":"Consulta datos de visitantes extranjeros por region (ej. Latinoamerica, Europa, África) con motivo del Mundial 2026"}, {"id":"consultar-comercio-exterior", "description":"Consulta datos de comercio exterior relacionados con la Ciudad de México"}],
+"securitySchemes":{"type":"apiKey", "note":"Elegido por simplicidad para el prototipo; se evaluara openID o mTLS a futuro por se un proyecto de INEGI por seguridad"}}
