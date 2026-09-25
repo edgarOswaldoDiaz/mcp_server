@@ -10,8 +10,12 @@ services:
     container_name: mcp_agente_a     # Nombre del contenedor en Docker
     working_dir: /app                # Carpeta de trabajo dentro del contenedor
     volumes:
-      - ./src:/app                  # Vincula la carpeta local 'src' con el contenedor
-    command: tail -f /dev/null       # Mantiene el contenedor activo en segundo plano
+      - .:/app                  # Vincula la carpeta local 'src' con el contenedor
+    ports:
+      - "8000:8000"
+    command: >
+      bash -c "pip install --no-cache-dir -r requirements.txt && 
+               uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
 
   # Configuración del Agente B (Cliente/Servidor)
   agente_b:
@@ -19,5 +23,5 @@ services:
     container_name: mcp_agente_b     # Nombre del contenedor en Docker
     working_dir: /app                # Carpeta de trabajo dentro del contenedor
     volumes:
-      - ./src:/app                  # Vincula la carpeta local 'src' con el contenedor
+      - .:/app                  # Vincula la carpeta local 'src' con el contenedor
     command: tail -f /dev/null       # Mantiene el contenedor activo en segundo plano
