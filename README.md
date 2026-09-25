@@ -27,3 +27,9 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
     *   [Tema 2.3.1: Herramientas para Host](assets/herramientas_host.md)
 *   **2.4: Modelos de Lenguaje Grande (LLMs)**
     *   [Tema 2.4.1: LLMs](assets/llm.md)
+
+**Unidad 3: Protocolo A2A (Agent-to-Agent)**
+*   [Tema 3.1: Arquitectura y Roles del Protocolo A2A](assets/a2a_arquitectura.md)
+*   [Tema 3.2: Esquema de Mensajes A2A](assets/a2a_esquema_mensajes.md)
+*   [Tema 3.3: Mecanismo de Autenticación](assets/a2a_autenticacion.md)
+*   [Tema 3.4: Contrato de Comunicación con el MCP Server](assets/a2a_contrato_mcp.md)

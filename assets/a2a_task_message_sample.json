@@ -1,0 +1,1 @@
+ { "task_id": "task-0001", "from": "agente-comercio-turismo-mundial", "to": "mcp-server-inegi", "action": "consultar-visitantes-extranjeros", "payload": { "region": "Latinoamerica", "periodo": "2026-Q3" }, "timestamp": "2026-09-24T21:00:00Z", "status": "pending" }
