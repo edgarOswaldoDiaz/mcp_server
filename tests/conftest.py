@@ -4,7 +4,7 @@ import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("A2A_BASE_URL", "http://localhost:8000")
+BASE_URL = os.environ.get("AGENT_URL", "http://localhost:8000")
 VALID_TOKEN = os.environ.get("A2A_API_KEY", "secret-a2a-token-123")
 INVALID_TOKEN = "token-invalido-000-fake"
 REQUEST_TIMEOUT = float(os.environ.get("A2A_REQUEST_TIMEOUT", "10"))
@@ -15,20 +15,20 @@ TERMINAL_STATES = {"TASK_STATE_COMPLETED", "TASK_STATE_FAILED"}
 
 @pytest.fixture(scope="session", autouse=True)
 def ensure_server_is_up():
-    try:
-        resp = requests.get(f"{BASE_URL}/.well-known/agent-card.json", timeout=5)
-    except requests.exceptions.RequestException as exc:
-        pytest.exit(
-            f"No se pudo conectar a {BASE_URL}. Verifica que el servicio "
-            f"(uvicorn / contenedor Docker) este corriendo. Detalle: {exc}",
-            returncode=1,
-        )
-    if resp.status_code >= 500:
-        pytest.exit(
-            f"El servidor respondio {resp.status_code} en {BASE_URL}. "
-            "Revisa los logs del contenedor antes de correr las pruebas.",
-            returncode=1,
-        )
+    last_exc = None
+    for _ in range(15):
+        try:
+            resp = requests.get(f"{BASE_URL}/.well-known/agent-card.json", timeout=5)
+            if resp.status_code < 500:
+                return
+        except requests.exceptions.RequestException as exc:
+            last_exc = exc
+        time.sleep(2)
+    pytest.exit(
+        f"No se pudo conectar a {BASE_URL} (AGENT_URL) tras varios intentos. "
+        f"Detalle: {last_exc}",
+        returncode=1,
+    )
 
 
 @pytest.fixture(scope="session")
