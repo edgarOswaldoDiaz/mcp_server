@@ -16,5 +16,10 @@ El Agent Card también indica, en `securityRequirements`, cuál(es) de esos esqu
 
 Si el token falta o no es válido, el servidor debe responder con un error de autenticación (equivalente a HTTP `401 Unauthorized`) y señalar qué esquema se necesita.
 
+
+## Esquema elegido para el prototipo
+
+Para este proyecto se implementó **HTTP Bearer Token**. El servidor (código de Yahell, `src/main.py` / `src/config.py`) ya valida el token en cada request mediante la función `authenticate`. Se eligió este esquema porque es simple de implementar en un entorno de pruebas y no requiere un proveedor externo de identidad (a diferencia de OAuth 2.0 u OpenID Connect).
+
 ---
 *Fuente: especificación oficial de A2A — [a2a-protocol.org/latest/specification](https://a2a-protocol.org/latest/specification)*
