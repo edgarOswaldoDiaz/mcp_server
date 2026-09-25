@@ -1,19 +1,23 @@
+# Versión de la sintaxis de Docker Compose
 version: '3.8'
 
+# Definición de los servicios (contenedores) para el entorno A2A
 services:
-  agente_a:
-    image: python:3.10-slim
-    container_name: mcp_agente_a
-    working_dir: /app
-    volumes:
-      - ./src:/app
-    command: tail -f /dev/null
 
-  agente_b:
-    image: python:3.10-slim
-    container_name: mcp_agente_b
-    working_dir: /app
+  # Configuración del Agente A (Cliente/Servidor)
+  agente_a:
+    image: python:3.10-slim          # Imagen base de Linux con Python 3.10
+    container_name: mcp_agente_a     # Nombre del contenedor en Docker
+    working_dir: /app                # Carpeta de trabajo dentro del contenedor
     volumes:
-      - ./src:/app
-    command: tail -f /dev/null
-    
+      - ./src:/app                  # Vincula la carpeta local 'src' con el contenedor
+    command: tail -f /dev/null       # Mantiene el contenedor activo en segundo plano
+
+  # Configuración del Agente B (Cliente/Servidor)
+  agente_b:
+    image: python:3.10-slim          # Imagen base de Linux con Python 3.10
+    container_name: mcp_agente_b     # Nombre del contenedor en Docker
+    working_dir: /app                # Carpeta de trabajo dentro del contenedor
+    volumes:
+      - ./src:/app                  # Vincula la carpeta local 'src' con el contenedor
+    command: tail -f /dev/null       # Mantiene el contenedor activo en segundo plano
