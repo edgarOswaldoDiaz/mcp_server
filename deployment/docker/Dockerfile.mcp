@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código del proyecto
 COPY src ./src
+COPY scripts ./scripts
 
 # El MCP Server escucha en este puerto
 EXPOSE 8000

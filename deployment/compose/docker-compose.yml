@@ -1,5 +1,28 @@
 services:
 
+  auth-init:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    command:
+      [
+        "python",
+        "scripts/generate_test_keys.py"
+      ]
+
+    environment:
+      MCP_PUBLIC_KEYS_DIR: /run/mcp-public
+      MCP_PRIVATE_KEYS_DIR: /run/mcp-private
+
+    volumes:
+      - mcp-test-public:/run/mcp-public
+      - mcp-test-private:/run/mcp-private
+
+    networks:
+      - mcp-network
+
+
   mcp-server:
     build:
       context: ../..
@@ -13,6 +36,17 @@ services:
     environment:
       MCP_HOST: 0.0.0.0
       MCP_PORT: 8000
+
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+
+    volumes:
+      - mcp-test-public:/run/mcp-public:ro
+
+    depends_on:
+      auth-init:
+        condition: service_completed_successfully
 
     restart: unless-stopped
 
@@ -41,6 +75,16 @@ services:
     environment:
       MCP_SERVER_URL: http://mcp-server:8000/mcp
 
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+
+    volumes:
+      - mcp-test-private:/run/mcp-private:ro
+      - mcp-test-public:/run/mcp-public:ro
+
     depends_on:
       mcp-server:
         condition: service_healthy
@@ -52,5 +96,10 @@ services:
 networks:
   mcp-network:
     driver: bridge
+
+
+volumes:
+  mcp-test-public:
+  mcp-test-private:
 
 

@@ -4,9 +4,12 @@ import json
 from fastmcp.exceptions import ToolError
 
 
-async def test_list_tools(mcp_server):
+async def test_list_tools(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         tools = await client.list_tools()
 
@@ -16,32 +19,40 @@ async def test_list_tools(mcp_server):
         }
 
         assert "echo" in tool_names
-        assert "sumar" in tool_names
+        assert "add" in tool_names
         assert "get_system_status" in tool_names
 
 
-async def test_echo(mcp_server):
+async def test_echo(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         result = await client.call_tool(
             "echo",
             {
-                "mensaje": "integration test"
+                "message": "integration test"
             }
         )
 
         assert result.is_error is False
 
-        assert result.data == "integration test"
+        assert result.data == {
+            "message": "integration test"
+        }
 
 
-async def test_add(mcp_server):
+async def test_add(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         result = await client.call_tool(
-            "sumar",
+            "add",
             {
                 "a": 10,
                 "b": 20
@@ -50,12 +61,17 @@ async def test_add(mcp_server):
 
         assert result.is_error is False
 
-        assert result.data == 30
+        assert result.data == {
+            "result": 30
+        }
 
 
-async def test_system_status(mcp_server):
+async def test_system_status(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         result = await client.call_tool(
             "get_system_status"
@@ -64,9 +80,13 @@ async def test_system_status(mcp_server):
         assert result.is_error is False
         assert result.data["status"] == "healthy"
 
-async def test_list_resources(mcp_server):
 
-    async with Client(mcp_server) as client:
+async def test_list_resources(mcp_server, mcp_access_token):
+
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         resources = await client.list_resources()
 
@@ -78,9 +98,12 @@ async def test_list_resources(mcp_server):
         assert "config://server" in resource_uris
 
 
-async def test_read_server_config(mcp_server):
+async def test_read_server_config(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         result = await client.read_resource(
             "config://server"
@@ -95,9 +118,12 @@ async def test_read_server_config(mcp_server):
         assert config["environment"] == "development"
 
 
-async def test_list_prompts(mcp_server):
+async def test_list_prompts(mcp_server, mcp_access_token):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         prompts = await client.list_prompts()
 
@@ -109,9 +135,15 @@ async def test_list_prompts(mcp_server):
         assert "system_diagnostic" in prompt_names
 
 
-async def test_get_system_diagnostic_prompt(mcp_server):
+async def test_get_system_diagnostic_prompt(
+    mcp_server,
+    mcp_access_token,
+):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         result = await client.get_prompt(
             "system_diagnostic"
@@ -120,14 +152,20 @@ async def test_get_system_diagnostic_prompt(mcp_server):
         assert len(result.messages) > 0
 
 
-async def test_invalid_tool_arguments(mcp_server):
+async def test_invalid_tool_arguments(
+    mcp_server,
+    mcp_access_token,
+):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         with pytest.raises(ToolError):
 
             await client.call_tool(
-                "sumar",
+                "add",
                 {
                     "a": 10,
                     "b": "invalid"
@@ -135,9 +173,15 @@ async def test_invalid_tool_arguments(mcp_server):
             )
 
 
-async def test_unknown_tool(mcp_server):
+async def test_unknown_tool(
+    mcp_server,
+    mcp_access_token,
+):
 
-    async with Client(mcp_server) as client:
+    async with Client(
+        mcp_server,
+        auth=mcp_access_token,
+    ) as client:
 
         with pytest.raises(ToolError):
 
