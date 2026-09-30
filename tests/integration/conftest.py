@@ -5,10 +5,7 @@ from fastmcp.server.auth.providers.jwt import RSAKeyPair
 from pydantic import SecretStr
 
 
-SERVER_URL = os.getenv(
-    "MCP_SERVER_URL",
-    "http://localhost:8000/mcp",
-)
+BASE_URL = os.environ.get("API_URL", "http://mcp-server:8000/mcp")
 
 PRIVATE_KEY_PATH = os.environ.get(
     "MCP_AUTH_PRIVATE_KEY_PATH",
@@ -28,7 +25,7 @@ AUDIENCE = os.environ.get(
 
 @pytest.fixture(scope="session")
 def mcp_server():
-    return SERVER_URL
+    return BASE_URL
 
 
 @pytest.fixture(scope="session")

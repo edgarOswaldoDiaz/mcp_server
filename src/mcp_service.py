@@ -1,31 +1,38 @@
-import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-from src.config import settings
+from fastmcp import Client
+
+from .config import settings
+from .mcp.client.auth_jwt import create_agent_token
+
 
 class MCPService:
-    def __init__(self, client: httpx.AsyncClient):
-        self.client = client
+    """
+    Cliente real del servidor MCP (protocolo Streamable HTTP + JWT).
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=1, max=5),
-        retry=retry_if_exception_type(httpx.HTTPError),
-        reraise=True
-    )
+    Reemplaza tanto la version REST simplificada original como la version
+    con mcp.client.sse.sse_client (transporte viejo, no coincide con el
+    servidor real que corre transport="streamable-http").
+    """
+
+    def __init__(self):
+        # el servidor real sirve en "/mcp", no en la raiz ni en "/sse"
+        self.mcp_url = f"{settings.mcp_server_url.rstrip('/')}/mcp"
+
     async def invoke_tool(self, tool_name: str, arguments: dict) -> dict:
-        response = await self.client.post(
-            f"{settings.mcp_server_url}/tools/call",
-            json={"name": tool_name, "arguments": arguments},
-            timeout=settings.mcp_timeout_seconds
-        )
-        response.raise_for_status()
-        return response.json()
+        token = create_agent_token()
+        async with Client(
+            self.mcp_url,
+            auth=token,                     # string -> Bearer automatico; NO usar headers=
+            timeout=settings.mcp_timeout_seconds,
+        ) as client:
+            result = await client.call_tool(tool_name, arguments)
+            return result.data
 
     async def fetch_resource(self, uri: str) -> dict:
-        response = await self.client.get(
-            f"{settings.mcp_server_url}/resources/read",
-            params={"uri": uri},
-            timeout=settings.mcp_timeout_seconds
-        )
-        response.raise_for_status()
-        return response.json()
+        token = create_agent_token()
+        async with Client(
+            self.mcp_url,
+            auth=token,
+            timeout=settings.mcp_timeout_seconds,
+        ) as client:
+            result = await client.read_resource(uri)  # ya es una lista, sin .contents
+            return {"result": [c.text for c in result]}

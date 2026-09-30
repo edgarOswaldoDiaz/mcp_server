@@ -1,27 +1,107 @@
-# Versión de la sintaxis de Docker Compose
-version: '3.8'
-
-# Definición de los servicios (contenedores) para el entorno A2A
 services:
-
-  # Configuración del Agente A (Cliente/Servidor)
-  agente_a:
-    image: python:3.10-slim          # Imagen base de Linux con Python 3.10
-    container_name: mcp_agente_a     # Nombre del contenedor en Docker
-    working_dir: /app                # Carpeta de trabajo dentro del contenedor
+  # 1. Generación de llaves para autenticación
+  auth-init:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.mcp
+    command: ["python", "scripts/generate_test_keys.py"]
+    environment:
+      MCP_PUBLIC_KEYS_DIR: /run/mcp-public
+      MCP_PRIVATE_KEYS_DIR: /run/mcp-private
     volumes:
-      - .:/app                  # Vincula la carpeta local 'src' con el contenedor
+      - mcp-test-public:/run/mcp-public
+      - mcp-test-private:/run/mcp-private
+    networks:
+      - mcp-network
+
+  # 2. Servidor MCP Principal
+  mcp-server:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.mcp
+    container_name: mcp-server
     ports:
       - "8000:8000"
+    environment:
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8000
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+    volumes:
+      - mcp-test-public:/run/mcp-public:ro
+      - .:/app
+    depends_on:
+      auth-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - mcp-network
+
+  # 3. Agente A (Simulador de Cliente / Agente)
+  agente_a:
+    image: python:3.12-slim
+    container_name: mcp_agente_a
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    environment:
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+    volumes:
+      - .:/app
+      - mcp-test-private:/run/mcp-private:ro
+    depends_on:
+      mcp-server:
+        condition: service_healthy
     command: >
       bash -c "pip install --no-cache-dir -r requirements.txt && 
-               uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+               uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload"
+    networks:
+      - mcp-network
 
-  # Configuración del Agente B (Cliente/Servidor)
+  # 4. Agente B
   agente_b:
-    image: python:3.10-slim          # Imagen base de Linux con Python 3.10
-    container_name: mcp_agente_b     # Nombre del contenedor en Docker
-    working_dir: /app                # Carpeta de trabajo dentro del contenedor
+    image: python:3.12-slim
+    container_name: mcp_agente_b
+    working_dir: /app
     volumes:
-      - .:/app                  # Vincula la carpeta local 'src' con el contenedor
-    command: tail -f /dev/null       # Mantiene el contenedor activo en segundo plano
+      - .:/app
+    command: tail -f /dev/null
+    networks:
+      - mcp-network
+
+  # 5. Tests de Integración
+  integration-tests:
+    build:
+      context: .
+      dockerfile: deployment/docker/Dockerfile.tests
+    environment:
+      API_URL: http://mcp-server:8000/mcp
+      AGENT_URL: http://agente_a:8001       
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+    volumes:
+      - .:/app
+      - mcp-test-private:/run/mcp-private:ro
+      - mcp-test-public:/run/mcp-public:ro
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+      agente_a:
+        condition: service_started
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  mcp-test-public:
+  mcp-test-private:

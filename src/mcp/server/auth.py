@@ -10,12 +10,12 @@ def create_auth() -> JWTVerifier:
 
     public_key_path = os.environ.get(
         "MCP_AUTH_PUBLIC_KEY_PATH",
-        os.path.expanduser("~/.mcp-keys/public_key.pem"),
+        "/run/mcp-public/public_key.pem"
     )
 
-    audience = os.environ.get(
+    aud = os.environ.get(
         "MCP_AUTH_AUDIENCE",
-        "mcp-interoperability-server",
+        "mcp-interoperability-server"
     )
 
     with open(public_key_path, "r", encoding="utf-8") as file:
@@ -23,5 +23,5 @@ def create_auth() -> JWTVerifier:
 
     return JWTVerifier(
         public_key=public_key,
-        audience=audience,
+        audience=aud,
     )

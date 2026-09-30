@@ -1,11 +1,16 @@
+from scripts import generate_dev_token
+from asyncio import selector_events
 import asyncio
+import os 
 from fastmcp import Client
+from src.mcp.client.auth_jwt import create_agent_token
 
 class ClientePruebasMCP:
     """Clase modular para ejecutar pruebas contra el servidor MCP del INEGI."""
 
     def __init__(self, url_servidor: str):
         self.url_servidor = url_servidor
+        self.headers = {"Authorization": f"Bearer {token}"}
 
     async def _listar_herramientas(self, client: Client) -> None:
         """Responsabilidad: Únicamente obtener y mostrar las herramientas disponibles."""
@@ -33,7 +38,7 @@ class ClientePruebasMCP:
         """Responsabilidad: Orquestar la conexión y el flujo de ejecución."""
         print(f"Conectando a: {self.url_servidor}...")
         
-        async with Client(self.url_servidor) as client:
+        async with Client(self.url_servidor, auth=token) as client:
             print("=== CLIENTE MCP CONECTADO ===")
             
             # 1. Mostrar qué sabe hacer el servidor
@@ -45,5 +50,9 @@ class ClientePruebasMCP:
 
 if __name__ == "__main__":
     # Inyección de dependencia: Definimos la ruta desde afuera
-    tester = ClientePruebasMCP("http://localhost:8000/sse")
+    url_base = os.getenv("MCP_SERVER_URL", "http://mcp-server:8000")
+    # Generamos el JWT usando tu función
+    token = create_agent_token()
+
+    tester = ClientePruebasMCP(f"{url_base.rstrip('/')}/mcp")
     asyncio.run(tester.iniciar_bateria_pruebas())

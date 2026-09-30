@@ -1,28 +1,17 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
 from typing import Optional
-import httpx
+from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
 
-from src.config import settings
-from src.schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message
-from src.mcp_service import MCPService
-from src.orchestrator import orchestrator
+from .config import settings
+from .schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message  # Cambiado 'Messages' por 'Message'
+from .mcp_service import MCPService
+from .orchestrator import orchestrator
 
-mcp_client_session: Optional[httpx.AsyncClient] = None
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global mcp_client_session
-    mcp_client_session = httpx.AsyncClient()
-    yield
-    await mcp_client_session.aclose()
-
-app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app = FastAPI(title=settings.app_name)
 
 def get_mcp_service() -> MCPService:
-    if not mcp_client_session:
-        raise RuntimeError("HTTP Session uninitialized")
-    return MCPService(mcp_client_session)
+    return MCPService()
 
 def authenticate(authorization: Optional[str] = Header(None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
@@ -50,6 +39,7 @@ async def get_agent_card():
         },
         "securityRequirements": [{"bearerAuth": []}]
     }
+
 
 @app.post("/a2a/rpc", response_model=JSONRPCResponse)
 async def dispatch_rpc(

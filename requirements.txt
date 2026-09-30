@@ -6,7 +6,7 @@ requests>=2.31.0
 pytest>=8.0.0
 httpx>=0.24.0
 tenacity>=8.2.0
-aiofile==3.12.3
+aiofile
 annotated-types==0.8.0
 anyio==4.15.1
 attrs==26.1.0

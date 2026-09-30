@@ -7,10 +7,7 @@ from pydantic import SecretStr
 from mcp.shared.exceptions import MCPError
 
 
-MCP_SERVER_URL = os.getenv(
-    "MCP_SERVER_URL",
-    "http://localhost:8000/mcp",
-)
+BASE_URL = os.getenv("API_URL", "http://mcp-server:8000/mcp")
 
 PRIVATE_KEY_PATH = os.environ.get(
     "MCP_AUTH_PRIVATE_KEY_PATH",
@@ -96,7 +93,7 @@ async def test_missing_token_is_rejected():
     with pytest.raises(MCPError) as exc_info:
 
         async with Client(
-            MCP_SERVER_URL,
+            BASE_URL,
         ):
             pass
 
@@ -110,7 +107,7 @@ async def test_invalid_token_is_rejected():
     with pytest.raises(MCPError) as exc_info:
 
         async with Client(
-            MCP_SERVER_URL,
+            BASE_URL,
             auth="token-falso",
         ):
             pass
@@ -129,7 +126,7 @@ async def test_wrong_audience_is_rejected():
     with pytest.raises(MCPError) as exc_info:
 
         async with Client(
-            MCP_SERVER_URL,
+            BASE_URL,
             auth=token,
         ):
             pass
@@ -148,7 +145,7 @@ async def test_expired_token_is_rejected():
     with pytest.raises(MCPError) as exc_info:
 
         async with Client(
-            MCP_SERVER_URL,
+            BASE_URL,
             auth=token,
         ):
             pass
@@ -164,7 +161,7 @@ async def test_read_scope_can_access_read_tools():
     token = create_token(["mcp:read"])
 
     async with Client(
-        MCP_SERVER_URL,
+        BASE_URL,
         auth=token,
     ) as client:
 
@@ -190,7 +187,7 @@ async def test_tools_scope_can_access_add():
     token = create_token(["mcp:tools"])
 
     async with Client(
-        MCP_SERVER_URL,
+        BASE_URL,
         auth=token,
     ) as client:
 
@@ -224,7 +221,7 @@ async def test_both_scopes_can_access_all_tools():
     )
 
     async with Client(
-        MCP_SERVER_URL,
+        BASE_URL,
         auth=token,
     ) as client:
 
