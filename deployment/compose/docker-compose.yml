@@ -22,6 +22,39 @@ services:
     networks:
       - mcp-network
 
+  token-init:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    command:
+      [
+        "python",
+        "scripts/generate_a2a_token.py"
+      ]
+
+    environment:
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+
+      MCP_TOKEN_OUTPUT_PATH: /run/mcp-token/access_token
+
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+      MCP_TOKEN_SUBJECT: a2a-agent
+      MCP_TOKEN_SCOPES: "mcp:read mcp:tools"
+
+    volumes:
+      - mcp-test-private:/run/mcp-private:ro
+      - mcp-test-public:/run/mcp-public:ro
+      - mcp-a2a-token:/run/mcp-token
+
+    depends_on:
+      auth-init:
+        condition: service_completed_successfully
+
+    networks:
+      - mcp-network
+
 
   mcp-server:
     build:
@@ -65,6 +98,7 @@ services:
 
     networks:
       - mcp-network
+      - interoperability
 
 
   integration-tests:
@@ -96,10 +130,13 @@ services:
 networks:
   mcp-network:
     driver: bridge
+  interoperability:
+    external: true
 
 
 volumes:
   mcp-test-public:
   mcp-test-private:
+  mcp-a2a-token:
 
 
