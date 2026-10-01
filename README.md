@@ -35,3 +35,4 @@ A continuación se presentan los módulos de investigación y desarrollo técnic
 *   [Tema 3.1: Seguridad en MCP](assets/seguridad.md)
 *   [Tema 3.2: OWASP Top 10 para MCP](assets/owasp_mcp.md)
 *   [Tema 3.3: OAuth 2.0](assets/oauth.md)
+*   [Tema 3.4: Gobernanza empresarial de MCP](assets/gobernanza.md)
