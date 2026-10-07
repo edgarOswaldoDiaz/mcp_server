@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional
-from .schemas import Task, TaskState, Status, Artifact, Part, Message
-from .mcp_service import MCPService
+from src.schemas import Task, TaskState, Status, Artifact, Part, Message
+from src.mcp_service import MCPService
 
 class TaskOrchestrator:
     def __init__(self):
@@ -32,7 +32,7 @@ class TaskOrchestrator:
         try:
             payload_text = next((p.text for p in task.history[-1].parts if p.text), "")
             
-            mcp_output = await mcp.invoke_tool("process_query", {"query": payload_text})
+            mcp_output = await mcp.invoke_tool("calculator_service", {"expression": payload_text})
 
             artifact = Artifact(
                 artifactId=f"art-{uuid.uuid4().hex[:6]}",
