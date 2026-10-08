@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional
-from .schemas import Task, TaskState, Status, Artifact, Part, Message
-from .mcp_service import MCPService
+from src.schemas import Task, TaskState, Status, Artifact, Part, Message
+from src.mcp_service import MCPService
 
 class TaskOrchestrator:
     def __init__(self):

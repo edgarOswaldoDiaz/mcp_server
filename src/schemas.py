@@ -9,7 +9,7 @@ class TaskState(str, Enum):
     AUTH_REQUIRED = "TASK_STATE_AUTH_REQUIRED"
     COMPLETED = "TASK_STATE_COMPLETED"
     FAILED = "TASK_STATE_FAILED"
-    CANCELED = "TASK_STATE_CANCELED"
+    CANCELED = "TASK_STATE_CANCELED" 
     REJECTED = "TASK_STATE_REJECTED"
 
 class Status(BaseModel):
@@ -54,6 +54,12 @@ class JSONRPCError(BaseModel):
     code: int
     message: str
     data: Optional[Any] = None
+
+class JSONRPCResponse(BaseModel):
+    jsonrpc: str = "2.0"
+    id: Union[str, int]
+    result: Optional[Any] = None
+    error: Optional[JSONRPCError] = None
 
 class JSONRPCResponse(BaseModel):
     jsonrpc: str = "2.0"
