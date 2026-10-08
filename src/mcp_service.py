@@ -1,14 +1,32 @@
 from fastmcp import Client
+from .config import settings
+from .mcp.client.auth_jwt import create_agent_token
+
 
 class MCPService:
-    def __init__(self, client: Client):
-        self.client = client
+    """
+    Cliente del servidor MCP.
+    """
+    def __init__(self):
+        # el servidor sirve en "/mcp"
+        self.mcp_url = f"{settings.mcp_server_url.rstrip('/')}/mcp"
 
-    async def list_tools(self):
-        return await self.client.list_tools()
+    async def invoke_tool(self, tool_name: str, arguments: dict) -> dict:
+        token = create_agent_token()
+        async with Client(
+            self.mcp_url,
+            auth=token,              
+            timeout=settings.mcp_timeout_seconds,
+        ) as client:
+            result = await client.call_tool(tool_name, arguments)
+            return result.data
 
-    async def invoke_tool(self, tool_name: str, arguments: dict):
-        return await self.client.call_tool(tool_name, arguments)
-
-    async def fetch_resource(self, uri: str):
-        return await self.client.read_resource(uri)
+    async def fetch_resource(self, uri: str) -> dict:
+        token = create_agent_token()
+        async with Client(
+            self.mcp_url,
+            auth=token,
+            timeout=settings.mcp_timeout_seconds,
+        ) as client:
+            result = await client.read_resource(uri) 
+            return {"result": [c.text for c in result]}

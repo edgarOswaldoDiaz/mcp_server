@@ -1,32 +1,15 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
 from typing import Optional
-from fastmcp import Client
+from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
+from .config import settings
+from .schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message  
+from .mcp_service import MCPService
+from .orchestrator import orchestrator
 
-from src.config import settings
-from src.schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message
-from src.mcp_service import MCPService
-from src.orchestrator import orchestrator
-
-mcp_client: Optional[Client] = None
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global mcp_client
-    # Inicialización del cliente FastMCP usando el Bearer Token para autenticarse
-    mcp_client = Client(
-        settings.mcp_server_url,
-        auth=settings.mcp_access_token
-    )
-    async with mcp_client:
-        yield
-
-app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app = FastAPI(title=settings.app_name)
 
 def get_mcp_service() -> MCPService:
-    if not mcp_client:
-        raise RuntimeError("MCP client uninitialized")
-    return MCPService(mcp_client)
+    return MCPService()
 
 def authenticate(authorization: Optional[str] = Header(None)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
@@ -54,6 +37,7 @@ async def get_agent_card():
         },
         "securityRequirements": [{"bearerAuth": []}]
     }
+
 
 @app.post("/a2a/rpc", response_model=JSONRPCResponse)
 async def dispatch_rpc(
