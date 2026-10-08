@@ -13,7 +13,7 @@ def create_agent_token() -> str:
         "sub": "agente_a",
         "aud": "mcp-interoperability-server",  
         "exp": int(time.time()) + 3600,        
-        "scopes": "mcp:read mcp:tools"    
+        "scope": "mcp:read mcp:tools"    
     }
     
     return jwt.encode(payload, private_key, algorithm="RS256")

@@ -32,7 +32,7 @@ class TaskOrchestrator:
         try:
             payload_text = next((p.text for p in task.history[-1].parts if p.text), "")
             
-            mcp_output = await mcp.invoke_tool("process_query", {"query": payload_text})
+            mcp_output = await mcp.invoke_tool("calculator_service", {"expression": payload_text})
 
             artifact = Artifact(
                 artifactId=f"art-{uuid.uuid4().hex[:6]}",
