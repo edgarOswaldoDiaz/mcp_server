@@ -11,6 +11,7 @@ services:
     volumes:
       - .:/app
       - mcp-test-private:/run/mcp-private:ro
+      - mcp-a2a-token:/run/mcp-token/access_token
     command: >
       bash -c "pip install --no-cache-dir -r requirements.txt && 
                uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload"
@@ -23,8 +24,11 @@ services:
     image: python:3.12-slim
     container_name: mcp_agente_b
     working_dir: /app
+    environment: 
+      MCP_TOKEN_OUTPUT_PATH: /run/mcp-token/access_token
     volumes:
       - .:/app
+      - mcp-a2a-token:/run/mcp-token/access_token
     command: tail -f /dev/null
     networks:
       - agent-network
