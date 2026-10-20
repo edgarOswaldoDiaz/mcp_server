@@ -1,10 +1,10 @@
 """Agente A2A del Equipo B.
 
-API FastAPI que recibe mensajes JSON-RPC (message/send), crea tareas y las ejecuta contra el servidor MCP.
+API FastAPI que recibe mensajes JSON-RPC (message/send), crea tareas y las ejecuta contra el servidor MCP
+en la red interna mcp-network.
 Rutas: GET /.well-known/agent-card.json (pública), POST /a2a/rpc y GET /a2a/tasks/{task_id} (requieren Bearer).
 """
 
-from contextlib import asynccontextmanager
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
 from .config import settings
@@ -15,23 +15,14 @@ from .orchestrator import orchestrator
 app = FastAPI(title=settings.app_name)
 
 def get_mcp_service() -> MCPService:
-    """Crea el servicio que comunica al agente con el servidor MCP (dependencia de FastAPI)."""
+    """Crea el servicio que comunica al agente con el servidor MCP."""
     return MCPService()
 
 def authenticate(authorization: Optional[str] = Header(None)) -> str:
-    """Valida el encabezado Authorization del cliente (primer tramo de autenticación).
-
-    Espera el formato "Bearer <token>" y compara el token con settings.api_key,
-    que se configura por variable de entorno. Se usa como dependencia de FastAPI
-    en POST /a2a/rpc y GET /a2a/tasks/{task_id}.
+    """Valida el encabezado Authorization del cliente.
 
     Raises:
-        HTTPException 401: si falta el encabezado o no usa el esquema Bearer
-            ("Missing or invalid authentication scheme"), o si el token no
-            coincide con la clave configurada ("Unauthorized access").
-
-    Returns:
-        str: el token validado.
+        HTTPException 401: si falta el encabezado o el token es inválido.
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
@@ -48,10 +39,7 @@ def authenticate(authorization: Optional[str] = Header(None)) -> str:
 
 @app.get("/.well-known/agent-card.json")
 async def get_agent_card():
-    """Devuelve la tarjeta del agente (Agent Card) para el descubrimiento.
-
-    Es pública por diseño y declara el esquema de seguridad bearerAuth.
-    """
+    """Devuelve la tarjeta del agente (Agent Card) para descubrimiento."""
     return {
         "name": settings.app_name,
         "description": "Enterprise A2A Protocol Implementation Node",
@@ -63,7 +51,6 @@ async def get_agent_card():
         "securityRequirements": [{"bearerAuth": []}]
     }
 
-
 @app.post("/a2a/rpc", response_model=JSONRPCResponse)
 async def dispatch_rpc(
     request: JSONRPCRequest,
@@ -71,10 +58,7 @@ async def dispatch_rpc(
     mcp: MCPService = Depends(get_mcp_service),
     _: str = Depends(authenticate)
 ):
-    """Recibe una solicitud JSON-RPC 2.0 y, si el método es message/send, crea una tarea y la ejecuta en segundo plano.
-
-    Responde de inmediato con la tarea en estado TASK_STATE_SUBMITTED. Devuelve el error -32601 si el método no es soportado y -32602 si faltan los parámetros (message). Requiere autenticación Bearer.
-    """
+    """Recibe una solicitud JSON-RPC 2.0 y procesa 'message/send' en segundo plano."""
     if request.method != "message/send":
         return JSONRPCResponse(
             id=request.id,
@@ -97,10 +81,7 @@ async def dispatch_rpc(
 
 @app.get("/a2a/tasks/{task_id}")
 async def fetch_task(task_id: str, _: str = Depends(authenticate)):
-    """Consulta el estado y el resultado de una tarea por su identificador (polling).
-
-    Responde 404 si la tarea no existe. Requiere autenticación Bearer.
-    """
+    """Consulta el estado y el resultado de una tarea por identificador."""
     task = orchestrator.get_by_id(task_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task ID not found")
