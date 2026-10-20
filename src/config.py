@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     mcp_timeout_seconds: float = 10.0
     
     # Ruta de lectura del volumen montado del Equipo A (ReadOnly)
-    mcp_token_path: str = "/keys/mcp_agent_token.jwt"
+    mcp_token_path: str = "/run/mcp-token/access_token.jwt"
 
     class Config:
         env_file = ".env"
