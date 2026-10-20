@@ -140,4 +140,3 @@ volumes:
   mcp-a2a-token:
     external: true
 
-
