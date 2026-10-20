@@ -138,5 +138,6 @@ volumes:
   mcp-test-public:
   mcp-test-private:
   mcp-a2a-token:
+    external: true
 
 
