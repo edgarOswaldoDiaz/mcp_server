@@ -7,11 +7,10 @@ services:
     ports:
       - "8001:8001"
     environment:
-      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+      MCP_ACCESS_TOKEN_PATH: /run/mcp-token/access_token
     volumes:
       - .:/app
-      - mcp-test-private:/run/mcp-private:ro
-      - mcp-a2a-token:/run/mcp-token/access_token
+      - mcp-a2a-token:/run/mcp-token:ro
     command: >
       bash -c "pip install --no-cache-dir -r requirements.txt && 
                uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload"
@@ -25,10 +24,10 @@ services:
     container_name: mcp_agente_b
     working_dir: /app
     environment: 
-      MCP_TOKEN_OUTPUT_PATH: /run/mcp-token/access_token
+      MCP_ACCESS_TOKEN_PATH: /run/mcp-token/access_token
     volumes:
       - .:/app
-      - mcp-a2a-token:/run/mcp-token/access_token
+      - mcp-a2a-token:/run/mcp-token:ro
     command: tail -f /dev/null
     networks:
       - agent-network
@@ -42,7 +41,5 @@ networks:
     external: true
 
 volumes:
-  mcp-test-public:
-  mcp-test-private:
   mcp-a2a-token:
     external: true
