@@ -23,6 +23,8 @@ services:
     image: python:3.12-slim
     container_name: mcp_agente_b
     working_dir: /app
+    ports:
+      - "8002:8001"
     environment: 
       MCP_TOKEN_PATH: /run/mcp-token/access_token
     volumes:
