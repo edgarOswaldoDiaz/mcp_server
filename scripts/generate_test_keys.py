@@ -1,5 +1,4 @@
 import os
-
 from fastmcp.server.auth.providers.jwt import RSAKeyPair
 
 
@@ -18,7 +17,7 @@ def main() -> None:
     os.makedirs(PUBLIC_KEYS_DIR, mode=0o700, exist_ok=True)
     os.makedirs(PRIVATE_KEYS_DIR, mode=0o700, exist_ok=True)
 
-    key_pair = RSAKeyPair.generate()
+
 
     private_key_path = os.path.join(
         PRIVATE_KEYS_DIR,
@@ -29,6 +28,22 @@ def main() -> None:
         PUBLIC_KEYS_DIR,
         "public_key.pem",
     )
+
+    # Si ambas llaves existen, las conservamos.
+    private_exists = os.path.isfile(private_key_path)
+    public_exists = os.path.isfile(public_key_path)
+
+    if private_exists and public_exists:
+        print("RSA keys already exist. Keeping existing keys.")
+        return
+
+    if private_exists != public_exists:
+        raise RuntimeError(
+            "Incomplete RSA key pair. Both keys must exist or neither. "
+            "Inspect the mounted volumes before regenerating keys."
+        )
+
+    key_pair = RSAKeyPair.generate()
 
     with open(
         private_key_path,
