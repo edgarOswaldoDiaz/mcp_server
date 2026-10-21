@@ -6,6 +6,7 @@ Comprueban la ficha del agente, el envío de mensajes,
 la creación de tareas y la consulta de sus estados.
 """
 import requests
+import uuid
 
 class TestAgentCard:
     """Comprueba la disponibilidad y estructura de la ficha del agente."""
@@ -87,4 +88,37 @@ class TestPollingDeTareas:
         # La prueba acepta tanto una finalización correcta como una fallida.
         assert final["status"]["state"] in ("TASK_STATE_COMPLETED", "TASK_STATE_FAILED"), (
             f"La tarea se quedo en '{final['status']['state']}' y no llego a un estado terminal a tiempo"
+        )
+
+    def test_ejecucion_mcp_echo(self, base_url, valid_headers, make_rpc_payload, make_message, poll_until_terminal):
+        """Comprueba que MCP ejecute echo y devuelva el mensaje enviado."""
+        input_echo = f"prueba-echo-{uuid.uuid4().hex}"
+
+        payload = make_rpc_payload(message=make_message(text=input_echo))
+
+        response = requests.post(f"{base_url}/a2a/rpc",json=payload,headers=valid_headers,timeout=10)
+
+        assert response.status_code == 200, response.text
+
+        body = response.json()
+        assert body.get("error") is None, body
+        assert body.get("result") is not None, body
+
+        task_id = body["result"]["id"]
+        final = poll_until_terminal(base_url, valid_headers, task_id)
+
+        assert final is not None, "La tarea no devolvió respuesta final"
+
+        # La tarea debe terminar correctamente, no solo dejar de ejecutarse.
+        assert final["status"]["state"] == "TASK_STATE_COMPLETED", (
+            f"La tarea terminó en {final['status']['state']}: "
+            f"{final['status'].get('message')}"
+        )
+
+        # El resultado de echo debe estar incluido en los artefactos.
+        artifacts = final.get("artifacts", [])
+        assert artifacts, "La tarea terminó sin artefactos de resultado"
+        assert input_echo in str(artifacts), (
+            "El resultado de MCP no contiene el mensaje enviado. "
+            f"Artefactos recibidos: {artifacts}"
         )
