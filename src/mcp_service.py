@@ -44,18 +44,19 @@ class MCPService:
             return result.data
 
 	async def invoke_list_tools(self):
-        """Invoca todas las herramientas disponibles del servidor MCP mediante la red interna mcp-network."""
-        token = self._read_token_from_volume()
-        async with Client(
-            self.mcp_url,
-            auth=token,              
-            timeout=settings.mcp_timeout_seconds,
-        ) as client:
-            tools = await client.list_tools()
-            print("TOOLS VISIBLES:")
-            for tool in tools:
-		        print("-", tool.name)
-
+		token = self.read_token_from_volume()
+		async with Client(
+			self.mcp_url,
+			auth=token,
+			timeout=settings.mcp_timeout_seconds,
+		) as client:
+			tools = await client.list_tools()
+			print("Tools visibles:")
+			for tool in tools:
+				print("-", tool.name)
+			
+		
+	
     async def fetch_resource(self, uri: str) -> dict:
         """Recupera un recurso del servidor MCP mediante la red interna mcp-network."""
         token = self._read_token_from_volume()
