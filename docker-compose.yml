@@ -7,7 +7,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      MCP_ACCESS_TOKEN_PATH: /run/mcp-token/access_token
+      MCP_TOKEN_PATH: /run/mcp-token/access_token
     volumes:
       - .:/app
       - mcp-a2a-token:/run/mcp-token:ro
@@ -24,7 +24,7 @@ services:
     container_name: mcp_agente_b
     working_dir: /app
     environment: 
-      MCP_ACCESS_TOKEN_PATH: /run/mcp-token/access_token
+      MCP_TOKEN_PATH: /run/mcp-token/access_token
     volumes:
       - .:/app
       - mcp-a2a-token:/run/mcp-token:ro
