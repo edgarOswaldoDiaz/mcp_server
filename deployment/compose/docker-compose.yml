@@ -34,6 +34,7 @@ services:
       ]
 
     environment:
+      
       MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
       MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
 
@@ -73,6 +74,13 @@ services:
       MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
 
       MCP_AUTH_AUDIENCE: mcp-interoperability-server
+
+      # Configuración para la conexión con MinIO (S3)
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET_NAME: mcp-bucket
+      AWS_DEFAULT_REGION: us-east-1
 
     volumes:
       - mcp-test-public:/run/mcp-public:ro
