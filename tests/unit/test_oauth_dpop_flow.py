@@ -131,3 +131,8 @@ def test_inactividad_cierra_sesion_y_bloquea_refresh(client):
     assert r.status_code == 401
     d2 = login(client, k)                                     # login nuevo si funciona
     assert call_mcp(client, k, d2["access_token"]).status_code == 200
+
+
+def test_docs_no_expuestas(client):
+    for ruta in ("/docs", "/redoc", "/openapi.json"):
+        assert client.get(ruta).status_code in (401, 404)

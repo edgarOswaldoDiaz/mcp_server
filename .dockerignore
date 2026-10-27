@@ -1,0 +1,9 @@
+# Nada de esto debe entrar a la imagen (secretos, entornos, historial)
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.env
+**/.env

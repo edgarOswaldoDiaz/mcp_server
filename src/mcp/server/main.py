@@ -57,7 +57,9 @@ def create_app() -> FastAPI:
     mcp = create_server(use_auth=False)
     mcp_app = mcp.http_app(path=MCP_PATH)
 
-    app = FastAPI(title="MCP Server con OAuth 2.0 + DPoP", lifespan=mcp_app.lifespan)
+    # Sin /docs, /redoc ni /openapi.json: son rutas publicas y no deben describir la API a nadie.
+    app = FastAPI(title="MCP Server con OAuth 2.0 + DPoP", lifespan=mcp_app.lifespan,
+                  docs_url=None, redoc_url=None, openapi_url=None)
     app.include_router(oauth_router)
     app.mount("/", mcp_app)
     app.add_middleware(DPoPGuard)
