@@ -28,18 +28,40 @@ def register_tools(mcp):
     # --- Herramientas de MinIO ---
     
     minio_service = MinIOService()
+    
+    # --- Herramientas de MinIO ---
+    minio_service = MinIOService()
 
     @mcp.tool()
-    def read_minio_json(object_key: str) -> dict:
+    def read_minio_json(object_key: str) -> str:
         """Lee un archivo JSON desde el bucket configurado en MinIO."""
-        return minio_service.read_json(object_key)
+        import json
+        
+        try:
+            # Llamamos al servicio actual
+            datos = minio_service.read_json(object_key)
+            # MCP prefiere recibir strings de texto limpios formateados
+            return json.dumps(datos, indent=2, ensure_ascii=False)
+            
+        except (FileNotFoundError, PermissionError, RuntimeError) as e:
+            # Capturamos errores controlados y los devolvemos como texto legible
+            return f"Error al leer MinIO: {str(e)}"
+        except Exception as e:
+            # Atrapamos cualquier otro error inesperado para evitar caídas del servidor
+            return f"Error inesperado: {str(e)}"
 
     @mcp.tool()
     def read_minio_parquet(object_key: str) -> str:
-        """Lee un archivo Parquet desde MinIO y devuelve su contenido en formato JSON."""
-        return minio_service.read_parquet(object_key)
+        """Lee un archivo Parquet desde MinIO y devuelve su contenido."""
+        try:
+            return minio_service.read_parquet(object_key)
+        except Exception as e:
+            return f"Error al leer Parquet en MinIO: {str(e)}"
 
     @mcp.tool()
     def read_minio_geoparquet(object_key: str) -> str:
-        """Lee un archivo GeoParquet desde MinIO y devuelve su contenido en formato GeoJSON."""
-        return minio_service.read_geoparquet(object_key)
+        """Lee un archivo GeoParquet desde MinIO y devuelve su contenido."""
+        try:
+            return minio_service.read_geoparquet(object_key)
+        except Exception as e:
+            return f"Error al leer GeoParquet en MinIO: {str(e)}"
