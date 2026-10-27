@@ -79,7 +79,7 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
-      MINIO_BUCKET_NAME: mcp-bucket
+      MINIO_BUCKET_NAME: datos-confidenciales
       AWS_DEFAULT_REGION: us-east-1
 
     volumes:
