@@ -2,8 +2,8 @@ from src.mcp.server.main import create_server
 from src.mcp.services.calculator_service import add_numbers
 
 def test_server_creation():
-    # Inicialización del servidor MCP configurado con OAuth/DPoP
-    server = create_server(use_auth=True)
+    # La autenticacion real (OAuth+DPoP) se prueba en test_oauth_dpop_flow.py; aqui solo el armado.
+    server = create_server(use_auth=False)
     assert server is not None
 
 def test_add_tool_logic():
