@@ -1,19 +1,70 @@
-"""Prueba de punta a punta: Agente A -> OAuth+DPoP -> MCP -> almacenamiento (solo lectura).
+"""Prueba de punta a punta del lado del MCP: cliente de prueba -> OAuth+DPoP -> MCP -> almacenamiento (solo lectura).
 
 Uso (dentro de la red de Docker):
   MCP_BASE_URL=http://mcp-server:8000 MCP_USERNAME=... MCP_PASSWORD=... python scripts/e2e_agente.py
 """
+import base64
+import hashlib
 import json
 import os
 import sys
+import time
+import uuid
 
+import jwt
 import requests
+from cryptography.hazmat.primitives.asymmetric import ec
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.oauth_client import DPoPA2AClient  # noqa: E402
+
+def _b64u(b: bytes) -> str:
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+
+
+class ClienteDPoP:
+    """Cliente de PRUEBA, autocontenido: no depende del codigo de ningun otro equipo.
+
+    Solo habla el protocolo publico del MCP (OAuth 2.0 + DPoP, RFC 9449).
+    """
+
+    def __init__(self):
+        base = os.getenv("MCP_BASE_URL", "http://mcp-server:8000").rstrip("/")
+        self.auth_url, self.refresh_url = f"{base}/oauth/token", f"{base}/oauth/refresh"
+        self.username = os.getenv("MCP_USERNAME", "")
+        self.password = os.getenv("MCP_PASSWORD", "")
+        self._key = ec.generate_private_key(ec.SECP256R1())
+        n = self._key.public_key().public_numbers()
+        self._jwk = {"kty": "EC", "crv": "P-256",
+                     "x": _b64u(n.x.to_bytes(32, "big")), "y": _b64u(n.y.to_bytes(32, "big"))}
+        self.access_token = None
+        self.refresh_token = None
+
+    def _create_dpop_proof(self, method, url, access_token=None):
+        claims = {"htm": method.upper(), "htu": url, "jti": str(uuid.uuid4()), "iat": int(time.time())}
+        if access_token:
+            claims["ath"] = _b64u(hashlib.sha256(access_token.encode()).digest())
+        return jwt.encode(claims, self._key, algorithm="ES256",
+                          headers={"typ": "dpop+jwt", "jwk": self._jwk})
+
+    def _post(self, url, body):
+        return requests.post(url, json=body, headers={"DPoP": self._create_dpop_proof("POST", url)}, timeout=30)
+
+    def request_access_token(self):
+        r = self._post(self.auth_url, {"username": self.username, "password": self.password})
+        r.raise_for_status()
+        d = r.json()
+        self.access_token, self.refresh_token = d["access_token"], d["refresh_token"]
+
+    def refresh_access_token(self):
+        if self.refresh_token:
+            r = self._post(self.refresh_url, {"refresh_token": self.refresh_token})
+            if r.status_code == 200:
+                self.access_token = r.json()["access_token"]
+                return
+        self.request_access_token()
+
 
 URL = os.getenv("MCP_BASE_URL", "http://mcp-server:8000").rstrip("/") + "/mcp"
-agente = DPoPA2AClient()
+agente = ClienteDPoP()
 sesion = {"id": None}
 _n = {"i": 0}
 

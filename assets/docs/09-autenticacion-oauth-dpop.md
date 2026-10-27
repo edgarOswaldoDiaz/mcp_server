@@ -73,6 +73,25 @@ Prueba de punta a punta con un agente de prueba, **dentro de la red de Docker** 
 Debe terminar en `RESULTADO: TODO OK`. Para conectar el almacenamiento local se puede usar un archivo
 `docker-compose.local.yml` propio (no versionado) que una el servicio a la red del almacenamiento.
 
+## Contrato con otros servicios (cómo se conecta un cliente)
+
+Los servicios son **independientes**: cada equipo levanta el suyo con su propio `docker-compose.yml` y su propio
+`.env`, sin necesitar el código del otro. Lo único que se comparte es esto:
+
+| Qué | Valor |
+|---|---|
+| Red de Docker externa | `interoperability` (se crea una vez por máquina: `docker network create interoperability`) |
+| URL del MCP | `http://mcp-server:8000` (herramientas en `/mcp`, OAuth en `/oauth/token` y `/oauth/refresh`) |
+| Credenciales del cliente | usuario y contraseña que crea quien administra el MCP y entrega por un canal privado; nunca van en git |
+| Protocolo | OAuth 2.0 + DPoP (sección "Flujo" de este documento) |
+
+Orden de arranque: **almacenamiento → MCP → agente**. El MCP nunca ve el código ni los secretos del agente, y el
+agente nunca ve los secretos del MCP ni las credenciales del almacenamiento (solo el MCP las tiene, con un usuario de
+solo lectura). Un cliente nuevo solo necesita implementar el flujo DPoP de este documento; `scripts/e2e_agente.py`
+es una implementación de referencia **autocontenida** (no importa código de ningún otro equipo).
+
+Nota: con `curl` simple no se puede probar `/oauth/token`, porque exige una prueba DPoP firmada en cada petición.
+
 ## Limitaciones conocidas
 
 - Las sesiones y los `jti` vistos viven **en memoria**: se pierden al reiniciar y no funcionan con varios workers.
