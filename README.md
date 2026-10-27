@@ -16,6 +16,7 @@ Haz clic en cualquiera de los siguientes enlaces para acceder a la sección corr
 6. [ Integración con Agente de IA (Red Externa)](assets/docs/06-integracion-clientes.md)
 7. [ Pruebas Automatizadas en Docker](assets/docs/07-pruebas-automatizadas.md)
 8. [ Pipeline CI/CD con GitLab CI](assets/docs/08-despliegue-docker.md)
+9. [ Autenticación OAuth 2.0 + DPoP](assets/docs/09-autenticacion-oauth-dpop.md)
 
 ---
 *Documentación modularizada del proyecto de interoperabilidad y servicios MCP.*
