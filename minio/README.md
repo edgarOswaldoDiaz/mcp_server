@@ -41,20 +41,17 @@ API: http://127.0.0.1:9000 y consola web: http://127.0.0.1:9001
     python "$REPO/minio/scripts/geoparquet.py"
     python "$REPO/minio/scripts/json_prueba.py"
 
-## 4. Bucket público, políticas y usuarios limitados
+## 4. Bucket público, políticas y usuarios limitados (automático)
 
-    $MC mb --ignore-existing local/datos-publicos
-    $MC admin policy create local politica-lector /politicas/politica-lector.json
-    $MC admin policy create local politica-confidencial /politicas/politica-confidencial.json
+En `minio/.env` agrega `LECTOR_PASSWORD` y `CONF_PASSWORD` (ver `.env.example`). Luego:
 
-    read -s -p "Contraseña lector-publico: " LECTOR_PASSWORD; echo
-    read -s -p "Contraseña lector-confidencial: " CONF_PASSWORD; echo
-    export LECTOR_PASSWORD CONF_PASSWORD
+    docker compose -f minio/docker-compose.yml --profile init up -d
+    docker compose -f minio/docker-compose.yml --profile init ps -a
 
-    $MC admin user add local lector-publico "$LECTOR_PASSWORD"
-    $MC admin policy attach local politica-lector --user lector-publico
-    $MC admin user add local lector-confidencial "$CONF_PASSWORD"
-    $MC admin policy attach local politica-confidencial --user lector-confidencial
+Cada comando de `mc` es un servicio aparte (la imagen de `mc` no trae shell), encadenados:
+`mc-listo` → buckets → políticas → usuarios → asignación de políticas. Todos deben terminar en `Exited (0)`.
+Si uno falla, mira `docker compose -f minio/docker-compose.yml --profile init logs <servicio>`.
+No corren con un `up` normal; solo con `--profile init`.
 
 Las contraseñas de los usuarios deben ser de 12 o más caracteres, solo letras y números, y distintas entre sí.
 

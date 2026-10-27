@@ -15,6 +15,108 @@ services:
       - red-datos
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # Inicializacion automatica (reemplaza el paso 4 del README).
+  # La imagen de mc NO trae shell, por eso hay UN servicio por comando, encadenados.
+  # No corren con un "up" normal: se activan con  --profile init
+  #   docker compose -f minio/docker-compose.yml --profile init up -d
+  # ---------------------------------------------------------------------------
+  mc-listo:
+    image: &mc cgr.dev/chainguard/minio-client:latest
+    profiles: ["init"]
+    command: ["ready", "local"]
+    environment: &mc-env
+      MC_HOST_local: http://${MINIO_ROOT_USER}:${MINIO_ROOT_PASSWORD}@minio:9000
+    depends_on:
+      minio:
+        condition: service_started
+    networks: [red-datos]
+    restart: on-failure:30
+
+  mc-bucket-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["mb", "--ignore-existing", "local/datos-confidenciales"]
+    environment: *mc-env
+    depends_on:
+      mc-listo:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-bucket-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["mb", "--ignore-existing", "local/datos-publicos"]
+    environment: *mc-env
+    depends_on:
+      mc-bucket-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-politica-lector:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "create", "local", "politica-lector", "/politicas/politica-lector.json"]
+    environment: *mc-env
+    volumes:
+      - ./politicas:/politicas:ro
+    depends_on:
+      mc-bucket-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-politica-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "create", "local", "politica-confidencial", "/politicas/politica-confidencial.json"]
+    environment: *mc-env
+    volumes:
+      - ./politicas:/politicas:ro
+    depends_on:
+      mc-politica-lector:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-usuario-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "user", "add", "local", "lector-publico", "${LECTOR_PASSWORD:?define LECTOR_PASSWORD en minio/.env}"]
+    environment: *mc-env
+    depends_on:
+      mc-politica-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-asignar-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "attach", "local", "politica-lector", "--user", "lector-publico"]
+    environment: *mc-env
+    depends_on:
+      mc-usuario-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-usuario-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "user", "add", "local", "lector-confidencial", "${CONF_PASSWORD:?define CONF_PASSWORD en minio/.env}"]
+    environment: *mc-env
+    depends_on:
+      mc-asignar-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-asignar-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "attach", "local", "politica-confidencial", "--user", "lector-confidencial"]
+    environment: *mc-env
+    depends_on:
+      mc-usuario-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
 volumes:
   minio_datos:
 
