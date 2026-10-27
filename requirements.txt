@@ -77,3 +77,4 @@ geopandas
 shapely
 passlib[bcrypt]>=1.7.4
 fastapi>=0.100.0
+requests

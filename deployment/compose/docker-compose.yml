@@ -71,23 +71,23 @@ services:
       MCP_HOST: 0.0.0.0
       MCP_PORT: 8000
 
-      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+      # OAuth 2.0 + DPoP (valores reales en deployment/compose/.env, NO se sube a git)
+      MCP_JWT_SECRET: ${MCP_JWT_SECRET:?define MCP_JWT_SECRET en .env}
+      MCP_REFRESH_SECRET: ${MCP_REFRESH_SECRET:?define MCP_REFRESH_SECRET en .env}
+      MCP_AUTH_USERNAME: ${MCP_AUTH_USERNAME:?define MCP_AUTH_USERNAME en .env}
+      MCP_AUTH_PASSWORD: ${MCP_AUTH_PASSWORD:?define MCP_AUTH_PASSWORD en .env}
+      MCP_IDLE_TIMEOUT_SECONDS: ${MCP_IDLE_TIMEOUT_SECONDS:-900}
+      MCP_ACCESS_TTL_SECONDS: ${MCP_ACCESS_TTL_SECONDS:-600}
+      # Debe ser la URL con la que el AGENTE llama al MCP (se valida el 'htu' de DPoP)
+      MCP_PUBLIC_BASE_URL: ${MCP_PUBLIC_BASE_URL:-http://mcp-server:8000}
 
-      MCP_AUTH_AUDIENCE: mcp-interoperability-server
-
-      # Configuración para la conexión con MinIO (S3)
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-      MINIO_BUCKET_NAME: datos-confidenciales
+      # MinIO: el MCP entra con el usuario de SOLO LECTURA del bucket confidencial,
+      # nunca con minioadmin (asi la politica del almacenamiento tambien protege).
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_READER_USER:?define MINIO_READER_USER en .env}
+      MINIO_SECRET_KEY: ${MINIO_READER_PASSWORD:?define MINIO_READER_PASSWORD en .env}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-datos-confidenciales}
       AWS_DEFAULT_REGION: us-east-1
-
-    volumes:
-      - mcp-test-public:/run/mcp-public:ro
-
-    depends_on:
-      auth-init:
-        condition: service_completed_successfully
 
     restart: unless-stopped
 
