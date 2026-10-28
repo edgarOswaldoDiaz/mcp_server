@@ -1,43 +1,25 @@
+version: '3.8'
+
 services:
-   # 3. Agente A (Simulador de Cliente / Agente)
-  agente_a:
+  agente_a2a:
     image: python:3.12-slim
-    container_name: mcp_agente_a
+    container_name: a2a_agent_node
     working_dir: /app
     ports:
-      - "8001:8001"
-    environment:
-      MCP_TOKEN_PATH: /run/mcp-token/access_token
+      - "8002:8001"
+    env_file:
+      - .env
     volumes:
       - .:/app
       - mcp-a2a-token:/run/mcp-token:ro
     command: >
-      bash -c "pip install --no-cache-dir -r requirements.txt && 
+      bash -c "pip install --no-cache-dir -r requirements.txt &&
                uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload"
     networks:
       - agent-network
       - interoperability
+    restart: unless-stopped
 
-  # 4. Agente B
-  agente_b:
-    image: python:3.12-slim
-    container_name: mcp_agente_b
-    working_dir: /app
-    ports:
-      - "8002:8001"
-    environment: 
-      MCP_TOKEN_PATH: /run/mcp-token/access_token
-    volumes:
-      - .:/app
-      - mcp-a2a-token:/run/mcp-token:ro
-    command: 
-       bash -c "pip install --no-cache-dir -r requirements.txt && 
-               uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload"
-    networks:
-      - agent-network
-      - interoperability
-
-  
 networks:
   agent-network:
     driver: bridge
