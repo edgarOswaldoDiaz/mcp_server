@@ -1,11 +1,9 @@
-"""Modelos de datos (Pydantic) del agente A2A.
-
-Definen los mensajes, tareas, estados según protocolo A2A y sobres JSON-RPC 2.0.
-"""
+"""Modelos de datos (Pydantic) del agente A2A."""
 
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel
+
 
 class TaskState(str, Enum):
     SUBMITTED = "TASK_STATE_SUBMITTED"
@@ -17,10 +15,12 @@ class TaskState(str, Enum):
     CANCELED = "TASK_STATE_CANCELED"
     REJECTED = "TASK_STATE_REJECTED"
 
+
 class Status(BaseModel):
     state: TaskState
     message: Optional[str] = None
     timestamp: str
+
 
 class Part(BaseModel):
     text: Optional[str] = None
@@ -28,11 +28,13 @@ class Part(BaseModel):
     url: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
 
+
 class Artifact(BaseModel):
     artifactId: str
     name: str
     description: Optional[str] = None
     parts: List[Part]
+
 
 class Message(BaseModel):
     messageId: str
@@ -42,6 +44,7 @@ class Message(BaseModel):
     parts: List[Part]
     metadata: Optional[Dict[str, Any]] = None
 
+
 class Task(BaseModel):
     id: str
     contextId: str
@@ -49,16 +52,19 @@ class Task(BaseModel):
     artifacts: List[Artifact] = []
     history: List[Message] = []
 
+
 class JSONRPCRequest(BaseModel):
     jsonrpc: str = "2.0"
     id: Union[str, int]
     method: str
     params: Dict[str, Any]
 
+
 class JSONRPCError(BaseModel):
     code: int
     message: str
     data: Optional[Any] = None
+
 
 class JSONRPCResponse(BaseModel):
     jsonrpc: str = "2.0"
