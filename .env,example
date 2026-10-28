@@ -1,0 +1,5 @@
+APP_NAME="A2A Agent Node"
+API_KEY="secret-a2a-token-123"
+MCP_SERVER_URL="http://mcp-server:8000"
+MCP_TIMEOUT_SECONDS=10.0
+MCP_TOKEN_PATH="/run/mcp-token/access_token"
