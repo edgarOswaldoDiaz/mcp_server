@@ -10,7 +10,6 @@ services:
       - .env
     volumes:
       - .:/app
-      - mcp-a2a-token:/run/mcp-token:ro
     networks:
       - agent-network
       - interoperability
@@ -22,6 +21,3 @@ networks:
   interoperability:
     external: true
 
-volumes:
-  mcp-a2a-token:
-    external: true

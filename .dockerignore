@@ -1,0 +1,8 @@
+.git
+.env
+deployment/
+assets/
+.venv/
+venv/
+__pycache__/
+*.pyc
