@@ -18,6 +18,7 @@ services:
       - rustfs_datos:/data      # volumen de Docker: no requiere permisos especiales (la imagen corre como uid 10001)
     networks:
       - red-datos
+      - interoperability        # red compartida con el MCP (debe existir: docker network create interoperability)
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -126,3 +127,5 @@ volumes:
 
 networks:
   red-datos:
+  interoperability:
+    external: true
