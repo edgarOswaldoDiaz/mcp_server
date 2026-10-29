@@ -1,0 +1,128 @@
+# RustFS (Apache 2.0) como almacenamiento S3 del proyecto. Misma receta que minio/, mismas politicas.
+# Levantar el servicio:      docker compose -f rustfs/docker-compose.yml up -d
+# Crear buckets/usuarios:    docker compose -f rustfs/docker-compose.yml --profile init up -d
+# Limpiar los init (quedan en Exited): docker compose -f rustfs/docker-compose.yml --profile init rm -f
+services:
+  rustfs:
+    # Fijada por digest (version exacta), igual que la imagen de MinIO.
+    image: rustfs/rustfs@sha256:ed9210d6411d77ffceb70d94b964a3cb7d225983368bc25bebe01e995293dcc2
+    container_name: rustfs
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ROOT_USER:?define RUSTFS_ROOT_USER en rustfs/.env}
+      RUSTFS_SECRET_KEY: ${RUSTFS_ROOT_PASSWORD:?define RUSTFS_ROOT_PASSWORD en rustfs/.env}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes:
+      - rustfs_datos:/data      # volumen de Docker: no requiere permisos especiales (la imagen corre como uid 10001)
+    networks:
+      - red-datos
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Inicializacion: un servicio por comando (la imagen de mc no trae shell), encadenados.
+  # Solo corren con  --profile init.
+  # ---------------------------------------------------------------------------
+  mc-listo:
+    image: &mc cgr.dev/chainguard/minio-client:latest
+    profiles: ["init"]
+    # "ls" usa solo la API S3: espera a que RustFS responda (no depende de comandos admin).
+    command: ["ls", "local"]
+    environment: &mc-env
+      MC_HOST_local: http://${RUSTFS_ROOT_USER}:${RUSTFS_ROOT_PASSWORD}@rustfs:9000
+    depends_on:
+      rustfs:
+        condition: service_started
+    networks: [red-datos]
+    restart: on-failure:30
+
+  mc-bucket-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["mb", "--ignore-existing", "local/datos-confidenciales"]
+    environment: *mc-env
+    depends_on:
+      mc-listo:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-bucket-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["mb", "--ignore-existing", "local/datos-publicos"]
+    environment: *mc-env
+    depends_on:
+      mc-bucket-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-politica-lector:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "create", "local", "politica-lector", "/politicas/politica-lector.json"]
+    environment: *mc-env
+    volumes:
+      - ./politicas:/politicas:ro
+    depends_on:
+      mc-bucket-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-politica-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "create", "local", "politica-confidencial", "/politicas/politica-confidencial.json"]
+    environment: *mc-env
+    volumes:
+      - ./politicas:/politicas:ro
+    depends_on:
+      mc-politica-lector:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-usuario-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "user", "add", "local", "lector-publico", "${LECTOR_PASSWORD:?define LECTOR_PASSWORD en rustfs/.env}"]
+    environment: *mc-env
+    depends_on:
+      mc-politica-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-asignar-publico:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "attach", "local", "politica-lector", "--user", "lector-publico"]
+    environment: *mc-env
+    depends_on:
+      mc-usuario-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-usuario-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "user", "add", "local", "lector-confidencial", "${CONF_PASSWORD:?define CONF_PASSWORD en rustfs/.env}"]
+    environment: *mc-env
+    depends_on:
+      mc-asignar-publico:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+  mc-asignar-confidencial:
+    image: *mc
+    profiles: ["init"]
+    command: ["admin", "policy", "attach", "local", "politica-confidencial", "--user", "lector-confidencial"]
+    environment: *mc-env
+    depends_on:
+      mc-usuario-confidencial:
+        condition: service_completed_successfully
+    networks: [red-datos]
+
+volumes:
+  rustfs_datos:
+
+networks:
+  red-datos:
