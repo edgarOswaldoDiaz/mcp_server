@@ -3,6 +3,7 @@
 import os
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
+from pydantic import ValidationError
 
 from .schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message
 from .mcp_service import DPoPClientService as MCPService
@@ -64,8 +65,13 @@ async def dispatch_rpc(
             id=request.id,
             error=JSONRPCError(code=-32602, message="Invalid params: 'message' required"),
         )
-
-    msg = Message(**raw_msg)
+    try:
+        msg = Message(**raw_msg)
+    except (ValidationError, TypeError):
+        return JSONRPCResponse(
+            id=request.id,
+            error=JSONRPCError(code=-32602, message="Invalid params: malformed message"),
+        )
     task = orchestrator.spawn_task(msg.contextId, msg)
     background_tasks.add_task(orchestrator.execute_workflow, task.id, mcp)
 
