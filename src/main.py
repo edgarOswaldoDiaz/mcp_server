@@ -10,7 +10,9 @@ from .mcp_service import DPoPClientService as MCPService
 from .orchestrator import orchestrator
 
 APP_NAME = os.environ.get("APP_NAME", "A2A Agent Node")
-API_KEY = os.environ.get("API_KEY", "secret-a2a-token-123")
+API_KEY = os.environ.get("API_KEY")
+if not API_KEY:
+    raise RuntimeError("Falta la variable API_KEY en el .env")
 
 app = FastAPI(title=APP_NAME)
 
