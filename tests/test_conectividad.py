@@ -5,6 +5,7 @@ Pruebas E2E de conectividad del agente A2A.
 Comprueban la ficha del agente, el envío de mensajes,
 la creación de tareas y la consulta de sus estados.
 """
+from typing import final
 import requests
 import uuid
 
@@ -85,10 +86,9 @@ class TestPollingDeTareas:
         final = poll_until_terminal(base_url, valid_headers, task_id)
         assert final is not None, "No se obtuvo respuesta durante el polling"
 
-        # La prueba acepta tanto una finalización correcta como una fallida.
-        assert final["status"]["state"] in ("TASK_STATE_COMPLETED", "TASK_STATE_FAILED"), (
-            f"La tarea se quedo en '{final['status']['state']}' y no llego a un estado terminal a tiempo"
-        )
+        # La prueba solo acepta  una finalización correcta.
+        assert final["status"]["state"] == "TASK_STATE_COMPLETED"
+        assert final.get("artifacts"), "La tarea terminó sin artefactos"    
 
     def test_ejecucion_mcp_echo(self, base_url, valid_headers, make_rpc_payload, make_message, poll_until_terminal):
         """Comprueba que MCP ejecute echo y devuelva el mensaje enviado."""

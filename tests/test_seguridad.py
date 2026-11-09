@@ -70,3 +70,25 @@ class TestErroresJSONRPC:
         data = resp.json()
         assert data["result"] is None
         assert data["error"]["code"] == -32602
+
+    def test_mensaje_mal_formado_devuelve_32602(self, base_url, valid_headers, make_rpc_payload):
+
+        mensaje = {
+            "messageId": "qa-malformed-001",
+            "role": "user",
+        }
+
+        payload = make_rpc_payload(message=mensaje)
+
+        resp = requests.post(
+            f"{base_url}/a2a/rpc",
+            json=payload,
+            headers=valid_headers,
+            timeout=10,
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+
+        assert data["result"] is None
+        assert data["error"]["code"] == -32602

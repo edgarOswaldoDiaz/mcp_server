@@ -4,12 +4,18 @@ import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("AGENT_URL", "http://localhost:8000")
-VALID_TOKEN = os.environ.get("A2A_API_KEY", "secret-a2a-token-123")
+BASE_URL = os.getenv("AGENT_URL", "http://localhost:8002")
+
+VALID_TOKEN = (
+    os.getenv("A2A_API_KEY")
+    or os.getenv("API_KEY")
+)
+
 INVALID_TOKEN = "token-invalido-000-fake"
-REQUEST_TIMEOUT = float(os.environ.get("A2A_REQUEST_TIMEOUT", "10"))
-POLL_TIMEOUT = float(os.environ.get("A2A_POLL_TIMEOUT", "30"))
-POLL_INTERVAL = float(os.environ.get("A2A_POLL_INTERVAL", "1"))
+
+REQUEST_TIMEOUT = float(os.getenv("A2A_REQUEST_TIMEOUT", "10"))
+POLL_TIMEOUT = float(os.getenv("A2A_POLL_TIMEOUT", "30"))
+POLL_INTERVAL = float(os.getenv("A2A_POLL_INTERVAL", "1"))
 
 TERMINAL_STATES = {"TASK_STATE_COMPLETED", "TASK_STATE_FAILED"}
 
@@ -32,13 +38,16 @@ def ensure_server_is_up():
 
 
 @pytest.fixture(scope="session")
-def base_url() -> str:
+def base_url():
     return BASE_URL
 
 
 @pytest.fixture(scope="session")
-def valid_headers() -> dict:
-    return {"Authorization": f"Bearer {VALID_TOKEN}", "Content-Type": "application/json"}
+def valid_headers():
+    if not VALID_TOKEN:
+        raise RuntimeError("Falta A2A_API_KEY o API_KEY. ""Configura la variable que utiliza el agente.")
+
+    return {"Authorization": f"Bearer {VALID_TOKEN}","Content-Type": "application/json"}
 
 
 @pytest.fixture(scope="session")

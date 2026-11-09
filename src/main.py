@@ -1,5 +1,6 @@
 """Agente A2A configurado directamente desde variables de entorno."""
 
+from pydantic import ValidationError
 import os
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
@@ -65,9 +66,34 @@ async def dispatch_rpc(
             error=JSONRPCError(code=-32602, message="Invalid params: 'message' required"),
         )
 
-    msg = Message(**raw_msg)
+        # Validar que message sea un objeto JSON.
+    if not isinstance(raw_msg, dict):
+        return JSONRPCResponse(
+            id=request.id,
+            error=JSONRPCError(
+                code=-32602,
+                message="Invalid params: 'message' must be an object",
+            ),
+        )
+
+    # Validar la estructura del mensaje A2A.
+    try:
+        msg = Message(**raw_msg)
+    except (ValidationError, TypeError, ValueError):
+        return JSONRPCResponse(
+            id=request.id,
+            error=JSONRPCError(
+                code=-32602,
+                message="Invalid params: malformed message",
+            ),
+        )
+
     task = orchestrator.spawn_task(msg.contextId, msg)
-    background_tasks.add_task(orchestrator.execute_workflow, task.id, mcp)
+    background_tasks.add_task(
+        orchestrator.execute_workflow,
+        task.id,
+        mcp,
+    )
 
     return JSONRPCResponse(id=request.id, result=task.dict())
 
