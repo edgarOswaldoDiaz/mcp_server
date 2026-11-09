@@ -60,7 +60,7 @@ docker compose -f deployment/compose/docker-compose.yml up -d --build mcp-server
 
 ## 3. Agente (rama `arreglo-dpop-yahell`)
 
-En `.env`: `MCP_USERNAME` y `MCP_PASSWORD` (los mismos `MCP_AUTH_*` del MCP).
+En `.env`: `API_KEY` (la clave de entrada del agente: invéntala con `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`; **sin ella el agente no arranca**), `MCP_USERNAME` y `MCP_PASSWORD` (los mismos `MCP_AUTH_*` del MCP).
 
 ```bash
 docker compose up -d --build
@@ -69,7 +69,7 @@ docker compose up -d --build
 ## 4. Probar el agente (una sola orden)
 
 ```bash
-./scripts/probar_agente.sh            # agente en http://localhost:8002
+API_KEY="<tu clave>" ./scripts/probar_agente.sh            # agente en http://localhost:8002
 ```
 
 Esperado: 6 líneas `PASA` y `RESULTADO: TODO CORRECTO`.
