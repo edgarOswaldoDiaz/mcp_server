@@ -4,13 +4,16 @@ from pydantic import ValidationError
 import os
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
+from pydantic import ValidationError
 
 from .schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message
 from .mcp_service import DPoPClientService as MCPService
 from .orchestrator import orchestrator
 
 APP_NAME = os.environ.get("APP_NAME", "A2A Agent Node")
-API_KEY = os.environ.get("API_KEY", "secret-a2a-token-123")
+API_KEY = os.environ.get("API_KEY")
+if not API_KEY:
+    raise RuntimeError("Falta la variable API_KEY en el .env")
 
 app = FastAPI(title=APP_NAME)
 
@@ -89,11 +92,7 @@ async def dispatch_rpc(
         )
 
     task = orchestrator.spawn_task(msg.contextId, msg)
-    background_tasks.add_task(
-        orchestrator.execute_workflow,
-        task.id,
-        mcp,
-    )
+    background_tasks.add_task(orchestrator.execute_workflow, task.id, mcp)
 
     return JSONRPCResponse(id=request.id, result=task.dict())
 
