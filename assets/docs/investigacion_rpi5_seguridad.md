@@ -1,21 +1,32 @@
 # Optimización de SO y Hardening de Contenedores para Raspberry Pi 5 (16GB)
-**Fecha de Avance:** 9 de noviembre de 2026
-**Rol:** Seguridad de Persistencia y Contenedores
+
+**Fecha de Avance:** 9 de noviembre de 2026  
+**Rol:** Seguridad de Persistencia y Contenedores  
+
+
 
 ## 1. Sistema Operativo y Kernel Optimizado
-Para aprovechar los 16GB de RAM de la Raspberry Pi 5 (arquitectura ARM64) en un entorno de agentes computacionales y ciencia de datos, se descartan SO de escritorio. 
-* **SO Recomendado:** Alpine Linux o Ubuntu Server 24.04 LTS (versión mínima).
-* **Optimización del Kernel:** Habilitar `cgroups v2` (Control Groups) para una gestión estricta de memoria y CPU, y `namespaces` para el aislamiento de procesos. Deshabilitar módulos del kernel innecesarios (Bluetooth, Wi-Fi si se usa Ethernet, audio) para reducir la superficie de ataque.
 
-## 2. Hardening (Endurecimiento) de Docker 
-Para cumplir con las normativas de seguridad, el entorno contenerizado implementa las siguientes directivas de protección:
+Para sacarle el máximo provecho a los 16GB de RAM de la Raspberry Pi 5 (arquitectura ARM64), descartamos por completo el uso de sistemas operativos de escritorio. Toda la memoria debe destinarse a los agentes computacionales y a los procesos de ciencia de datos.
 
-* **Modo Rootless:** Ejecutar el demonio de Docker sin privilegios de superusuario (root) para evitar escalamiento de privilegios si un contenedor es comprometido.
-* **Límites de Recursos (Prevención DoS):** Asignación estricta de memoria (ej. máximo 2GB por agente) y cuotas de CPU para evitar que un contenedor acapare la Raspberry Pi 5 y cause una denegación de servicio local.
-* **Redes Virtuales Aisladas:** Creación de redes internas (ej. `agent_network`) donde los contenedores se comunican sin exposición al exterior. Solo el orquestador o API Gateway expone puertos.
-* **Manejo de Secretos:** Uso de `docker secrets` para inyectar credenciales (como las llaves de RustFS/S3) directamente en memoria (tmpfs), sin guardarlas en variables de entorno o archivos en disco.
-* **Volúmenes Cifrados:** Cifrado en reposo para los volúmenes de datos (`microdatos`, `macrodatos`) y registros (logs), asegurando la protección de la información estadística y geográfica.
-* **Políticas de Reinicio:** Configuración de `restart: unless-stopped` para resiliencia ante fallos del servicio o reinicios de la Raspberry Pi.
+* **Sistema Operativo Recomendado:** Alpine Linux o Ubuntu Server 24.04 LTS en su versión mínima.
+* **Optimización a Nivel de Kernel:** Habilitación de `cgroups v2` (Control Groups) para un control estricto de CPU/RAM y `namespaces` para aislamiento de procesos. Desactivación de módulos innecesarios a nivel de hardware (Bluetooth, Wi-Fi al usar Ethernet y controladores de audio) para minimizar la superficie de ataque.
+
+
+
+## 2. Hardening (Endurecimiento) de Docker
+
+Para cumplir con las normativas de seguridad, la arquitectura contenerizada implementa las siguientes reglas de protección:
+
+* **Modo Rootless:** Ejecución del demonio de Docker sin privilegios de superusuario (`root`). Si un contenedor se ve comprometido, el atacante no obtendrá permisos de administración sobre la Raspberry Pi.
+* **Límites de Recursos (Prevención DoS):** Asignación de cuotas de CPU y límites estrictos de memoria (máximo 2GB por agente) para evitar saturación del sistema o ataques de Denegación de Servicio local.
+* **Redes Virtuales Aisladas:** Implementación de redes internas (`Internal: true`) tipo búnker. Los contenedores se comunican internamente sin exposición a internet; solo los orquestadores autorizados exponen puertos.
+* **Manejo Seguro de Secretos:** Uso de `docker secrets` para inyectar credenciales (como llaves de RustFS/S3) directamente en memoria volátil (`tmpfs`), evitando almacenar contraseñas en variables de entorno o archivos de disco.
+* **Volúmenes Cifrados:** Cifrado en reposo para los volúmenes de almacenamiento de datos y registros (*logs*), garantizando la integridad de la información estadística y geográfica.
+* **Alta Disponibilidad:** Configuración de la política `restart: unless-stopped` para permitir la autorrecuperación de los servicios ante cortes de energía o reinicios de la tarjeta.
+
+
 
 ## 3. Escaneo de Vulnerabilidades
-Se integrará herramientas como **Trivy** en las canalizaciones de CI/CD para escanear las imágenes base (ej. RustFS) antes del despliegue, asegurando que no existan vulnerabilidades críticas (CVEs) conocidas en las capas de los contenedores.
+
+Integración de herramientas como **Trivy** dentro de las canalizaciones de CI/CD para auditar las imágenes base (como RustFS) antes de su despliegue, previniendo la introducción de vulnerabilidades conocidas (CVEs) en el entorno de producción.

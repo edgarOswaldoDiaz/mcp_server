@@ -1,8 +1,8 @@
 services:
   rustfs_storage:
-    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    image: python:3.10-slim
     container_name: rustfs_secure_node
-    command: server /data --console-address ":9001"
+    command: sleep infinity
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
