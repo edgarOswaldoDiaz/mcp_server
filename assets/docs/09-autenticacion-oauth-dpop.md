@@ -52,7 +52,7 @@ Hay una plantilla en `deployment/compose/.env.example`.
 
 ## Solo lectura en dos capas
 
-1. El MCP **no ofrece herramientas de escritura** (solo `read_minio_json`, `read_minio_parquet`, `read_minio_geoparquet`).
+1. El MCP **no ofrece herramientas de escritura**. Expone lecturas de archivos (`read_minio_json`, `read_minio_parquet`, `read_minio_geoparquet`) y consultas SQL de solo lectura (`list_datasets`, `describe_dataset`, `query_dataset`).
 2. MinIO mismo rechaza escritura y acceso al otro bucket al usuario `lector-confidencial` (política
    `politica-confidencial`). Ver la rama `Almacenamiento-MinIO`.
 

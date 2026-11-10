@@ -46,6 +46,9 @@ El servidor expone el siguiente catálogo para el Agente de IA:
 * **`read_minio_json`**: Lectura y estructuración de archivos `.json` en MinIO.
 * **`read_minio_parquet`**: Procesamiento de datos tabulares `.parquet` en MinIO.
 * **`read_minio_geoparquet`**: Lectura de capas geoespaciales `.geoparquet` a GeoJSON.
+* **`list_datasets`**, **`describe_dataset`** y **`query_dataset`**: catálogo, esquema y consultas SQL `SELECT` sobre archivos Parquet del bucket `datos-confidenciales`.
+
+Todas las herramientas devuelven un diccionario con la forma `{"ok": true, "data": {...}}` o `{"ok": false, "error": {"code": "...", "message": "..."}}`.
 
 ---
 

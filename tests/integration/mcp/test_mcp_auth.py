@@ -171,6 +171,9 @@ async def test_read_scope_can_access_read_tools():
         tool_names = await get_tool_names(client)
 
         assert "get_system_status" in tool_names
+        assert "list_datasets" in tool_names
+        assert "describe_dataset" in tool_names
+        assert "query_dataset" in tool_names
         assert "echo" in tool_names
         assert "add" not in tool_names
 
@@ -180,7 +183,8 @@ async def test_read_scope_can_access_read_tools():
         )
 
         assert result.data == {
-            "message": "integration test"
+            "ok": True,
+            "data": {"message": "integration test"},
         }
 
 
@@ -209,7 +213,8 @@ async def test_tools_scope_can_access_add():
         )
 
         assert result.data == {
-            "result": 30
+            "ok": True,
+            "data": {"result": 30},
         }
 
 
@@ -233,6 +238,9 @@ async def test_both_scopes_can_access_all_tools():
         assert "get_system_status" in tool_names
         assert "echo" in tool_names
         assert "add" in tool_names
+        assert "list_datasets" in tool_names
+        assert "describe_dataset" in tool_names
+        assert "query_dataset" in tool_names
 
         echo_result = await client.call_tool(
             "echo",
@@ -240,7 +248,8 @@ async def test_both_scopes_can_access_all_tools():
         )
 
         assert echo_result.data == {
-            "message": "integration test"
+            "ok": True,
+            "data": {"message": "integration test"},
         }
 
         add_result = await client.call_tool(
@@ -252,5 +261,6 @@ async def test_both_scopes_can_access_all_tools():
         )
 
         assert add_result.data == {
-            "result": 30
+            "ok": True,
+            "data": {"result": 30},
         }

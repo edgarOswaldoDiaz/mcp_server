@@ -21,6 +21,9 @@ async def test_list_tools(mcp_server, mcp_access_token):
         assert "echo" in tool_names
         assert "add" in tool_names
         assert "get_system_status" in tool_names
+        assert "list_datasets" in tool_names
+        assert "describe_dataset" in tool_names
+        assert "query_dataset" in tool_names
 
 
 async def test_echo(mcp_server, mcp_access_token):
@@ -40,7 +43,8 @@ async def test_echo(mcp_server, mcp_access_token):
         assert result.is_error is False
 
         assert result.data == {
-            "message": "integration test"
+            "ok": True,
+            "data": {"message": "integration test"},
         }
 
 
@@ -62,7 +66,8 @@ async def test_add(mcp_server, mcp_access_token):
         assert result.is_error is False
 
         assert result.data == {
-            "result": 30
+            "ok": True,
+            "data": {"result": 30},
         }
 
 
@@ -78,7 +83,8 @@ async def test_system_status(mcp_server, mcp_access_token):
         )
 
         assert result.is_error is False
-        assert result.data["status"] == "healthy"
+        assert result.data["ok"] is True
+        assert result.data["data"]["status"] == "healthy"
 
 
 async def test_list_resources(mcp_server, mcp_access_token):
