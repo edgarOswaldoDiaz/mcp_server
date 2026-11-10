@@ -74,6 +74,8 @@ class TaskOrchestrator:
             return "read_minio_json"
         if k.endswith(".parquet"):
             return "read_minio_geoparquet" if k.startswith("geo/") else "read_minio_parquet"
+        if k.endswith(".geoparquet"):
+            return "read_minio_geoparquet"
         return None
 
     def get_by_id(self, task_id: str) -> Optional[Task]:
