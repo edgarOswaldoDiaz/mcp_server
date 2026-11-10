@@ -83,14 +83,14 @@ class TaskOrchestrator:
     @staticmethod
     def _validar_ruta(key: str) -> None:
         """Rechaza rutas peligrosas antes de pedir el archivo al MCP."""
-        permitidos = set(string.ascii_letters + string.digits + "_-./")
+        permitidos = set(string.ascii_letters + string.digits + "_-./ áéíóúüñÁÉÍÓÚÜÑ")
         if not key or len(key) > 200:
             raise ValueError("Ruta invalida")
         if not set(key) <= permitidos:
             raise ValueError("Ruta invalida")
         if key.startswith("/") or "//" in key:
             raise ValueError("Ruta invalida")
-        if ".." in key.split("/"):
+        if ".." in [parte.strip() for parte in key.split("/")]:
             raise ValueError("Ruta invalida")
 
     def get_by_id(self, task_id: str) -> Optional[Task]:
