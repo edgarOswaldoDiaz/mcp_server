@@ -4,6 +4,7 @@ Crea las tareas, las ejecuta contra el servidor MCP mediante mcp-network y manti
 """
 
 import uuid
+import string
 from datetime import datetime, timezone
 from typing import Dict, Optional
 from .schemas import Task, TaskState, Status, Artifact, Part, Message
@@ -45,6 +46,7 @@ class TaskOrchestrator:
             # Cualquier otro texto conserva el comportamiento anterior (echo).
             if payload_text.strip().lower().startswith("leer "):
                 key = payload_text.strip()[5:].strip()
+                self._validar_ruta(key)
                 tool = self._read_tool_for(key)
                 if tool is None:
                     raise ValueError(f"Extension no soportada para '{key}' (use .json o .parquet)")
@@ -77,6 +79,19 @@ class TaskOrchestrator:
         if k.endswith(".geoparquet"):
             return "read_minio_geoparquet"
         return None
+
+    @staticmethod
+    def _validar_ruta(key: str) -> None:
+        """Rechaza rutas peligrosas antes de pedir el archivo al MCP."""
+        permitidos = set(string.ascii_letters + string.digits + "_-./")
+        if not key or len(key) > 200:
+            raise ValueError("Ruta invalida")
+        if not set(key) <= permitidos:
+            raise ValueError("Ruta invalida")
+        if key.startswith("/") or "//" in key:
+            raise ValueError("Ruta invalida")
+        if ".." in key.split("/"):
+            raise ValueError("Ruta invalida")
 
     def get_by_id(self, task_id: str) -> Optional[Task]:
         """Busca una tarea por su identificador."""
