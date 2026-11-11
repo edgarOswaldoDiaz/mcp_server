@@ -1,0 +1,153 @@
+services:
+
+  auth-init:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    command:
+      [
+        "python",
+        "scripts/generate_test_keys.py"
+      ]
+
+    environment:
+      MCP_PUBLIC_KEYS_DIR: /run/mcp-public
+      MCP_PRIVATE_KEYS_DIR: /run/mcp-private
+
+    volumes:
+      - mcp-test-public:/run/mcp-public
+      - mcp-test-private:/run/mcp-private
+
+    networks:
+      - mcp-network
+
+  token-init:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    command:
+      [
+        "python",
+        "scripts/generate_a2a_token.py"
+      ]
+
+    environment:
+      
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+
+      MCP_TOKEN_OUTPUT_PATH: /run/mcp-token/access_token
+
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+      MCP_TOKEN_SUBJECT: a2a-agent
+      MCP_TOKEN_SCOPES: "mcp:read mcp:tools"
+
+    volumes:
+      - mcp-test-private:/run/mcp-private:ro
+      - mcp-test-public:/run/mcp-public:ro
+      - mcp-a2a-token:/run/mcp-token
+
+    depends_on:
+      auth-init:
+        condition: service_completed_successfully
+
+    networks:
+      - mcp-network
+
+
+  mcp-server:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.mcp
+
+    container_name: mcp-server
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 8000
+
+      # OAuth 2.0 + DPoP (valores reales en deployment/compose/.env, NO se sube a git)
+      MCP_JWT_SECRET: ${MCP_JWT_SECRET:?define MCP_JWT_SECRET en .env}
+      MCP_REFRESH_SECRET: ${MCP_REFRESH_SECRET:?define MCP_REFRESH_SECRET en .env}
+      MCP_AUTH_USERNAME: ${MCP_AUTH_USERNAME:?define MCP_AUTH_USERNAME en .env}
+      MCP_AUTH_PASSWORD: ${MCP_AUTH_PASSWORD:?define MCP_AUTH_PASSWORD en .env}
+      MCP_IDLE_TIMEOUT_SECONDS: ${MCP_IDLE_TIMEOUT_SECONDS:-900}
+      MCP_ACCESS_TTL_SECONDS: ${MCP_ACCESS_TTL_SECONDS:-600}
+      # Debe ser la URL con la que el AGENTE llama al MCP (se valida el 'htu' de DPoP)
+      MCP_PUBLIC_BASE_URL: ${MCP_PUBLIC_BASE_URL:-http://mcp-server:8000}
+
+      # MinIO: el MCP entra con el usuario de SOLO LECTURA del bucket confidencial,
+      # nunca con minioadmin (asi la politica del almacenamiento tambien protege).
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_READER_USER:?define MINIO_READER_USER en .env}
+      MINIO_SECRET_KEY: ${MINIO_READER_PASSWORD:?define MINIO_READER_PASSWORD en .env}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-datos-confidenciales}
+      AWS_DEFAULT_REGION: us-east-1
+      QUERY_MAX_FILE_BYTES: ${QUERY_MAX_FILE_BYTES:-268435456}
+      QUERY_MAX_ROWS: ${QUERY_MAX_ROWS:-500}
+      QUERY_TIMEOUT_SECONDS: ${QUERY_TIMEOUT_SECONDS:-10}
+
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; socket.create_connection(('127.0.0.1', 8000), timeout=2)"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+    networks:
+      - mcp-network
+      - interoperability
+
+
+  integration-tests:
+    build:
+      context: ../..
+      dockerfile: deployment/docker/Dockerfile.tests
+
+    environment:
+      MCP_SERVER_URL: http://mcp-server:8000/mcp
+
+      MCP_AUTH_PRIVATE_KEY_PATH: /run/mcp-private/private_key.pem
+
+      MCP_AUTH_PUBLIC_KEY_PATH: /run/mcp-public/public_key.pem
+
+      MCP_AUTH_AUDIENCE: mcp-interoperability-server
+
+    volumes:
+      - mcp-test-private:/run/mcp-private:ro
+      - mcp-test-public:/run/mcp-public:ro
+
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+
+    networks:
+      - mcp-network
+
+
+networks:
+  mcp-network:
+    driver: bridge
+  interoperability:
+    external: true
+
+
+volumes:
+  mcp-test-public:
+  mcp-test-private:
+  mcp-a2a-token:
+    external: true
+

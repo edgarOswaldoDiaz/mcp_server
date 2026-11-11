@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BloquearAccesoSinAutenticacion",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::datos-confidenciales",
+        "arn:aws:s3:::datos-confidenciales/*"
+      ],
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      }
+    },
+    {
+      "Sid": "PermitirSoloLecturaAutorizada",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::datos-confidenciales",
+        "arn:aws:s3:::datos-confidenciales/*"
+      ]
+    }
+  ]
+}
