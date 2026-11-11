@@ -10,6 +10,8 @@ from .schemas import JSONRPCRequest, JSONRPCResponse, JSONRPCError, Message
 from .mcp_service import DPoPClientService as MCPService
 from .orchestrator import orchestrator
 
+import logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 APP_NAME = os.environ.get("APP_NAME", "A2A Agent Node")
 API_KEY = os.environ.get("API_KEY")
 if not API_KEY:
