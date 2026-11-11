@@ -5,10 +5,13 @@ Crea las tareas, las ejecuta contra el servidor MCP mediante mcp-network y manti
 
 import uuid
 import string
+import logging
 from datetime import datetime, timezone
 from typing import Dict, Optional
 from .schemas import Task, TaskState, Status, Artifact, Part, Message
 from .mcp_service import DPoPClientService as MCPService
+
+logger = logging.getLogger("a2a.audit")
 
 class TaskOrchestrator:
     """Gestiona el ciclo de vida de las tareas del agente."""
@@ -29,6 +32,7 @@ class TaskOrchestrator:
             history=[message]
         )
         self._store[task_id] = task
+        logger.info("tarea=%s creada contexto=%s", task_id, ctx)
         return task
 
     async def execute_workflow(self, task_id: str, mcp: MCPService) -> None:
@@ -46,12 +50,15 @@ class TaskOrchestrator:
             # Cualquier otro texto conserva el comportamiento anterior (echo).
             if payload_text.strip().lower().startswith("leer "):
                 key = payload_text.strip()[5:].strip()
+                logger.info("tarea=%s ruta_pedida=%r", task_id, key[:200])
                 self._validar_ruta(key)
                 tool = self._read_tool_for(key)
                 if tool is None:
                     raise ValueError(f"Extension no soportada para '{key}' (use .json o .parquet)")
+                logger.info("tarea=%s herramienta=%s", task_id, tool)
                 mcp_output = await mcp.invoke_tool(tool, {"object_key": key})
             else:
+                logger.info("tarea=%s herramienta=echo", task_id)
                 mcp_output = await mcp.invoke_tool("echo", {"message": payload_text})
 
             if not isinstance(mcp_output, dict):   # Part.data solo admite diccionarios
@@ -102,5 +109,6 @@ class TaskOrchestrator:
         task.status.state = state
         task.status.message = msg
         task.status.timestamp = datetime.now(timezone.utc).isoformat()
+        logger.info("tarea=%s estado=%s mensaje=%r", task.id, getattr(state, "value", state), (msg or "")[:200])
 
 orchestrator = TaskOrchestrator()
