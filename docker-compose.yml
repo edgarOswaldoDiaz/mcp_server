@@ -1,23 +1,41 @@
-version: '3.8'
-
 services:
-  agente_a2a:
-    build: .
-    container_name: a2a_agent_node
-    ports:
-      - "8002:8001"
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-    networks:
-      - agent-network
-      - interoperability
+  rustfs_storage:
+    image: python:3.10-slim
+    container_name: rustfs_secure_node
+    command: sleep infinity
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true 
+    deploy:   
+      resources: 
+        limits:
+          cpus: '2.0'
+          memory: 4G
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment: 
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - MINIO_ROOT_USER_FILE=/run/secrets/s3_admin_user
+      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/s3_admin_password
+    volumes:
+      - rustfs_data:/data
+    networks:
+      - isolated_agent_net
+    secrets: 
+      - s3_admin_user
+      - s3_admin_password
 
 networks:
-  agent-network:
+  isolated_agent_net:
     driver: bridge
-  interoperability:
-    external: true
+    internal: true
 
+volumes:
+  rustfs_data:
+    driver: local
+
+secrets:
+  s3_admin_user:
+    file: ./config/s3_user.txt
+  s3_admin_password:
+    file: ./config/s3_password.txt
