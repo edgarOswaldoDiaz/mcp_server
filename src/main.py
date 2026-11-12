@@ -2,6 +2,7 @@
 
 from pydantic import ValidationError
 import os
+import hmac
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, BackgroundTasks, Depends, status
 from pydantic import ValidationError
@@ -31,7 +32,7 @@ def authenticate(authorization: Optional[str] = Header(None)) -> str:
             detail="Missing or invalid authentication scheme",
         )
     token = authorization.split(" ")[1]
-    if token != API_KEY:
+    if not hmac.compare_digest(token.encode(), API_KEY.encode()):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized access",
