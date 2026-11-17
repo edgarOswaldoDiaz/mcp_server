@@ -1,4 +1,18 @@
 services:
+  agente_a2a:
+    build: .
+    container_name: a2a_agent_node
+    ports:
+      - "8002:8001"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    networks:
+      - agent-network
+      - interoperability
+    restart: unless-stopped
+
   rustfs_storage:
     image: python:3.10-slim
     container_name: rustfs_secure_node
@@ -26,6 +40,10 @@ networks:
   isolated_agent_net:
     driver: bridge
     internal: true
+  agent-network:
+    driver: bridge
+  interoperability:
+    external: true
 
 volumes:
   rustfs_data:
