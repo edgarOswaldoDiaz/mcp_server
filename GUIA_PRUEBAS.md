@@ -6,7 +6,7 @@ Tres servicios, cada uno en su propia rama y su propio `docker-compose`. Ninguno
 |---|---|---|
 | Almacenamiento (RustFS; MinIO es equivalente) | `almacenamiento-rustfs` (MinIO: `Almacenamiento-MinIO`) | Guarda los datos sintéticos y aplica los permisos por bucket |
 | Servidor MCP | `oauth-dpop-integracion` (PR #2) | Entrega herramientas de **solo lectura**; exige OAuth 2.0 + DPoP |
-| Agente A2A | `arreglo-dpop-yahell` (PR #3) | Recibe tareas (`leer <ruta>`) y las ejecuta contra el MCP |
+| Agente A2A | `A2A` | Recibe tareas (`leer <ruta>`) y las ejecuta contra el MCP |
 
 ```
 agente A2A --(OAuth 2.0 + DPoP)--> MCP --(cuenta lector-confidencial)--> RustFS / MinIO
@@ -49,6 +49,13 @@ Esperado: `RESULTADO: TODO CORRECTO` (8 casos `PASA`).
 
 ## 2. MCP (rama `oauth-dpop-integracion`)
 
+La rama `A2A` ya no trae el código del MCP. Clona la rama del Equipo A en **otra carpeta** y haz ahí estos pasos (el `.env` de abajo va dentro de esa carpeta):
+
+```bash
+git clone -b oauth-dpop-integracion https://github.com/edgarOswaldoDiaz/mcp_server mcp_equipo_a
+cd mcp_equipo_a
+```
+
 En `deployment/compose/.env` (nunca se sube a git) define `MCP_JWT_SECRET`, `MCP_REFRESH_SECRET`, `MCP_AUTH_USERNAME`,
 `MCP_AUTH_PASSWORD`, `MINIO_READER_USER=lector-confidencial` y `MINIO_READER_PASSWORD` (= `CONF_PASSWORD` de `rustfs/.env`).
 Para RustFS añade `MINIO_ENDPOINT=http://rustfs:9000`.
@@ -58,7 +65,7 @@ docker volume create mcp-a2a-token        # el compose lo declara externo (resto
 docker compose -f deployment/compose/docker-compose.yml up -d --build mcp-server
 ```
 
-## 3. Agente (rama `arreglo-dpop-yahell`)
+## 3. Agente (rama `A2A`)
 
 En `.env`: `API_KEY` (la clave de entrada del agente: invéntala con `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`; **sin ella el agente no arranca**), `MCP_USERNAME` y `MCP_PASSWORD` (los mismos `MCP_AUTH_*` del MCP).
 
