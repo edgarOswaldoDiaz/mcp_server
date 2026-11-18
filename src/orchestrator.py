@@ -3,6 +3,7 @@
 Crea las tareas, las ejecuta contra el servidor MCP mediante mcp-network y mantiene su estado.
 """
 
+import os
 import uuid
 import string
 import logging
@@ -57,10 +58,18 @@ class TaskOrchestrator:
                     raise ValueError(f"Extension no soportada para '{key}' (use .json o .parquet)")
                 logger.info("tarea=%s herramienta=%s", task_id, tool)
                 mcp_output = await mcp.invoke_tool(tool, {"object_key": key})
+            elif os.environ.get("AGENTE_USAR_MODELO", "false").lower() == "true":
+                # Modelo (Ollama): entiende la pregunta y elige herramientas del MCP
+                from .agente_llm import responder
+                logger.info("tarea=%s herramienta=modelo", task_id)
+                mcp_output = {"respuesta": await responder(payload_text)}
             else:
                 logger.info("tarea=%s herramienta=echo", task_id)
                 mcp_output = await mcp.invoke_tool("echo", {"message": payload_text})
 
+            if isinstance(mcp_output, dict) and mcp_output.get("ok") is False:
+                err = mcp_output.get("error") or {}
+                raise RuntimeError("%s: %s" % (str(err.get("code", "ERROR"))[:60], str(err.get("message", "error del servidor"))[:200]))
             if not isinstance(mcp_output, dict):   # Part.data solo admite diccionarios
                 mcp_output = {"result": mcp_output}
 
