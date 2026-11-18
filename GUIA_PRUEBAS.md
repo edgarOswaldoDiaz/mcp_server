@@ -73,6 +73,16 @@ En `.env`: `API_KEY` (la clave de entrada del agente: invéntala con `python3 -c
 docker compose up -d --build
 ```
 
+### Modelo de lenguaje (opcional, apagado por defecto)
+
+Con el modelo apagado, los mensajes que no empiezan con `leer` se contestan con `echo` (es lo que usan las pruebas). Para que los conteste el modelo de Ollama:
+
+1. Abre Ollama en tu computadora y descarga un modelo con soporte de herramientas: `ollama pull llama3.2:1b`.
+2. Agrega a tu `.env`: `AGENTE_USAR_MODELO=true` (y `OLLAMA_MODEL=<nombre>` si usas otro modelo).
+3. Recrea el agente: `docker compose up -d --force-recreate agente_a2a`.
+
+El agente llega a Ollama por `OLLAMA_HOST` (ya viene en el compose: `http://host.docker.internal:11434`). Con el modelo encendido, las pruebas que usan `echo` no aplican.
+
 ## 4. Probar el agente (una sola orden)
 
 ```bash
