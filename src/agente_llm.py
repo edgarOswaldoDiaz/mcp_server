@@ -11,6 +11,10 @@ import ollama
 audit = logging.getLogger("a2a.audit")
 
 
+class RespuestaFallida(RuntimeError):
+    """Error al contestar; el orquestador marca la tarea como FAILED."""
+
+
 class LlamadaInvalida(ValueError):
     """La llamada que pidio el modelo no pasa las reglas."""
 
@@ -140,7 +144,7 @@ async def responder(pregunta):
                                    tools=HERRAMIENTAS, options={"temperature": 0, "num_predict": NUM_PREDICT})
         except Exception as e:
             audit.error("agente: fallo el modelo (%s)", type(e).__name__)
-            return "El modelo no esta disponible en este momento."
+            raise RespuestaFallida("El modelo no esta disponible en este momento.")
 
         llamadas = r.message.tool_calls or []
         if not llamadas:
@@ -159,15 +163,15 @@ async def responder(pregunta):
             if isinstance(resultado, dict) and resultado.get("ok") is False:
                 err = resultado.get("error") or {}
                 audit.warning("agente: la herramienta %r devolvio error %s", nombre, str(err.get("code", "?"))[:60])
-                return "No pude completar la consulta: " + str(err.get("message", "error del servidor"))[:200]
+                raise RespuestaFallida("No pude completar la consulta: " + str(err.get("message", "error del servidor"))[:200])
             audit.info("agente: herramienta ejecutada %r", nombre)
             contenido = json.dumps(resultado, default=str)[:MAX_RESULTADO]
         except LlamadaInvalida as e:
             contenido = "Error: " + str(e)
         except Exception as e:
             audit.error("agente: fallo la herramienta %r (%s)", nombre, type(e).__name__)
-            return "No pude ejecutar la herramienta en este momento."
+            raise RespuestaFallida("No pude ejecutar la herramienta en este momento.")
         mensajes.append({"role": "tool", "tool_name": nombre, "content": contenido})
 
     audit.warning("agente: se llego al limite de %d vueltas", MAX_VUELTAS)
-    return "No pude completar la consulta dentro del limite de pasos."
+    raise RespuestaFallida("No pude completar la consulta dentro del limite de pasos.")
