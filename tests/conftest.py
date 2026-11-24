@@ -19,7 +19,7 @@ POLL_INTERVAL = float(os.getenv("A2A_POLL_INTERVAL", "1"))
 
 TERMINAL_STATES = {"TASK_STATE_COMPLETED", "TASK_STATE_FAILED"}
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def ensure_server_is_up():
     last_exc = None
     for _ in range(15):
@@ -38,14 +38,14 @@ def ensure_server_is_up():
 
 
 @pytest.fixture(scope="session")
-def base_url():
+def base_url(ensure_server_is_up):
     return BASE_URL
 
 
 @pytest.fixture(scope="session")
 def valid_headers():
     if not VALID_TOKEN:
-        raise RuntimeError("Falta A2A_API_KEY o API_KEY. ""Configura la variable que utiliza el agente.")
+        raise RuntimeError("Falta A2A_API_KEY o API_KEY. Configura la variable que utiliza el agente.")
 
     return {"Authorization": f"Bearer {VALID_TOKEN}","Content-Type": "application/json"}
 

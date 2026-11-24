@@ -6,7 +6,6 @@ import logging
 import os
 import re
 
-import ollama
 
 audit = logging.getLogger("a2a.audit")
 
@@ -34,9 +33,11 @@ ARGUMENTOS = {
 _ID_VALIDO = re.compile(r"^(?=.{1,128}$)[A-Za-z0-9_\-]+(?:/[A-Za-z0-9_\-]+)*(?:\.[A-Za-z0-9]{1,10})?$")
 
 
+
 def validar_sql(sql):
-    """Acepta un solo SELECT sobre la tabla dataset. Es una segunda capa:
-    la revision principal la hace el MCP."""
+    """Acepta un solo SELECT sobre la tabla dataset.
+    Bloquea operaciones peligrosas y funciones de acceso externo.
+    """
     if not isinstance(sql, str):
         raise LlamadaInvalida("sql no es texto")
     s = sql.strip()
@@ -44,10 +45,33 @@ def validar_sql(sql):
         s = s[:-1].strip()
     if not s or len(s) > 1000:
         raise LlamadaInvalida("sql vacio o muy largo")
-    if ";" in s or "--" in s or "/*" in s:
-        raise LlamadaInvalida("sql con varias sentencias o comentarios")
+    # Evitar multiples sentencias y comentarios SQL.
+    if ";" in s or "--" in s or "/*" in s or "*/" in s:
+        raise LlamadaInvalida(
+            "sql con varias sentencias o comentarios"
+        )
+    # Solo se permiten consultas SELECT.
     if not re.match(r"(?is)^select\b", s):
         raise LlamadaInvalida("sql no empieza con SELECT")
+    # UNION permite combinar resultados de consultas.
+    if re.search(r"(?i)\bunion\b", s):
+        raise LlamadaInvalida("sql con UNION no permitido")
+    # Bloquear funciones que pueden acceder a archivos
+    # o fuentes externas desde DuckDB.
+    funciones_peligrosas = (
+        r"\b(?:"
+        r"read_parquet|parquet_scan|"
+        r"read_csv|read_csv_auto|"
+        r"read_json|read_json_auto|"
+        r"read_text|read_blob|"
+        r"glob|sqlite_scan|postgres_scan|mysql_scan|"
+        r"iceberg_scan|delta_scan"
+        r")\s*\("
+    )
+    if re.search(r"(?i)" + funciones_peligrosas, s):
+        raise LlamadaInvalida(
+            "sql con funciones de acceso externo no permitidas"
+        )
     if re.search(r"(?i)\bjoin\b", s):
         raise LlamadaInvalida("sql con JOIN")
     if re.search(r"(?i)\bfrom\s+[^\s,;()]+\s*,", s):
@@ -60,27 +84,37 @@ def validar_sql(sql):
 
 def validar_llamada(nombre, argumentos):
     """Revisa una llamada del modelo. Devuelve los argumentos limpios
-    o lanza LlamadaInvalida."""
+    o lanza LlamadaInvalida.
+    """
     try:
         if nombre not in ARGUMENTOS:
             raise LlamadaInvalida("herramienta no permitida")
+        # Primero validar el tipo, incluso si no hay argumentos esperados.
+        if not isinstance(argumentos, dict):
+            raise LlamadaInvalida("los argumentos deben ser un objeto")
         esperados = ARGUMENTOS[nombre]
-        if not esperados:
-            return {}  # herramienta sin argumentos: se ignora lo que mande el modelo
-        if not isinstance(argumentos, dict) or set(argumentos) != esperados:
-            claves = sorted(argumentos) if isinstance(argumentos, dict) else type(argumentos).__name__
-            raise LlamadaInvalida("argumentos distintos a los esperados: %s" % (claves,))
+        # Exigir coincidencia exacta de argumentos.
+        if set(argumentos.keys()) != esperados:
+            claves = sorted(str(k) for k in argumentos.keys())
+            raise LlamadaInvalida(
+                "argumentos distintos a los esperados: %s" % claves
+            )
         limpios = dict(argumentos)
         if "dataset_id" in limpios:
             d = limpios["dataset_id"]
-            if not (isinstance(d, str) and _ID_VALIDO.match(d)):
+            if not (isinstance(d, str) and _ID_VALIDO.fullmatch(d)):
                 raise LlamadaInvalida("dataset_id no valido")
         if "sql" in limpios:
             limpios["sql"] = validar_sql(limpios["sql"])
         return limpios
     except LlamadaInvalida as e:
-        audit.warning("llamada rechazada: herramienta=%r motivo=%s", str(nombre)[:200], e)
+        audit.warning(
+            "llamada rechazada: herramienta=%r motivo=%s",
+            str(nombre)[:200],
+            e
+        )
         raise
+
 
 
 # ---------- Ciclo con el modelo ----------
@@ -126,6 +160,13 @@ HERRAMIENTAS = [
 
 async def responder(pregunta):
     """Recibe una pregunta en lenguaje natural y devuelve la respuesta."""
+
+    try:
+        import ollama
+    except ImportError:
+        audit.error("agente: la dependencia ollama no esta instalada")
+        return "El modelo no esta disponible en este momento."
+
     from .mcp_service import DPoPClientService
 
     cliente = ollama.AsyncClient(host=OLLAMA_HOST, timeout=TIMEOUT_MODELO)
