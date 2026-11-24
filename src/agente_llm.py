@@ -164,6 +164,12 @@ HERRAMIENTAS = [
 ]
 
 
+def _parece_llamada(texto):
+    """True si todo el texto es un bloque entre llaves que parece una llamada a herramienta."""
+    t = texto.strip()
+    return t.startswith("{") and t.endswith("}") and ('"function"' in t or '"name"' in t)
+
+
 async def responder(pregunta):
     """Recibe una pregunta en lenguaje natural y devuelve la respuesta."""
 
@@ -191,7 +197,14 @@ async def responder(pregunta):
 
         llamadas = r.message.tool_calls or []
         if not llamadas:
-            return r.message.content or ""
+            texto = r.message.content or ""
+            if not _parece_llamada(texto):
+                return texto
+            # El modelo escribio una llamada como texto: no se entrega al usuario
+            audit.warning("agente: respuesta con forma de llamada a herramienta, se pide corregir")
+            mensajes.append({"role": "assistant", "content": texto})
+            mensajes.append({"role": "user", "content": "Tu respuesta no es valida. Responde en texto normal o usa la herramienta con argumentos reales."})
+            continue
 
         if len(llamadas) > 1:
             audit.warning("agente: el modelo pidio %d herramientas, se usa solo la primera",
@@ -206,9 +219,10 @@ async def responder(pregunta):
             if isinstance(resultado, dict) and resultado.get("ok") is False:
                 err = resultado.get("error") or {}
                 audit.warning("agente: la herramienta %r devolvio error %s", nombre, str(err.get("code", "?"))[:60])
-                raise RespuestaFallida("No pude completar la consulta: " + str(err.get("message", "error del servidor"))[:200])
-            audit.info("agente: herramienta ejecutada %r", nombre)
-            contenido = json.dumps(resultado, default=str)[:MAX_RESULTADO]
+                contenido = "Error: " + str(err.get("message", "error del servidor"))[:200]
+            else:
+                audit.info("agente: herramienta ejecutada %r", nombre)
+                contenido = json.dumps(resultado, default=str)[:MAX_RESULTADO]
         except LlamadaInvalida as e:
             contenido = "Error: " + str(e)
         except Exception as e:
